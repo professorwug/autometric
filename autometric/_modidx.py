@@ -5,4 +5,224 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://professorwug.github.io',
                 'git_url': 'https://github.com/professorwug/autometric',
                 'lib_path': 'autometric'},
-  'syms': {'autometric.core': {'autometric.core.foo': ('core.html#foo', 'autometric/core.py')}}}
+  'syms': { 'autometric.autoencoders': { 'autometric.autoencoders.AutoencoderModel': ( '2a autoencoder.html#autoencodermodel',
+                                                                                       'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.AutoencoderModel.decode': ( '2a autoencoder.html#autoencodermodel.decode',
+                                                                                              'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.AutoencoderModel.encode': ( '2a autoencoder.html#autoencodermodel.encode',
+                                                                                              'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.AutoencoderModel.forward': ( '2a '
+                                                                                               'autoencoder.html#autoencodermodel.forward',
+                                                                                               'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.AutoencoderModel.immersion': ( '2a '
+                                                                                                 'autoencoder.html#autoencodermodel.immersion',
+                                                                                                 'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder': ( '2a autoencoder.html#boxautoencoder',
+                                                                                     'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder.__init__': ( '2a autoencoder.html#boxautoencoder.__init__',
+                                                                                              'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder.decode': ( '2a autoencoder.html#boxautoencoder.decode',
+                                                                                            'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder.encode': ( '2a autoencoder.html#boxautoencoder.encode',
+                                                                                            'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder.forward': ( '2a autoencoder.html#boxautoencoder.forward',
+                                                                                             'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder.forward_': ( '2a autoencoder.html#boxautoencoder.forward_',
+                                                                                              'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder.get_activation': ( '2a '
+                                                                                                    'autoencoder.html#boxautoencoder.get_activation',
+                                                                                                    'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder.load': ( '2a autoencoder.html#boxautoencoder.load',
+                                                                                          'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.BoxAutoEncoder.register_hook': ( '2a '
+                                                                                                   'autoencoder.html#boxautoencoder.register_hook',
+                                                                                                   'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder': ( '2a '
+                                                                                               'autoencoder.html#convolutionalautoencoder',
+                                                                                               'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.__init__': ( '2a '
+                                                                                                        'autoencoder.html#convolutionalautoencoder.__init__',
+                                                                                                        'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.decode': ( '2a '
+                                                                                                      'autoencoder.html#convolutionalautoencoder.decode',
+                                                                                                      'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.encode': ( '2a '
+                                                                                                      'autoencoder.html#convolutionalautoencoder.encode',
+                                                                                                      'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.forward': ( '2a '
+                                                                                                       'autoencoder.html#convolutionalautoencoder.forward',
+                                                                                                       'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.forward_': ( '2a '
+                                                                                                        'autoencoder.html#convolutionalautoencoder.forward_',
+                                                                                                        'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.get_activation': ( '2a '
+                                                                                                              'autoencoder.html#convolutionalautoencoder.get_activation',
+                                                                                                              'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.immersion': ( '2a '
+                                                                                                         'autoencoder.html#convolutionalautoencoder.immersion',
+                                                                                                         'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.load': ( '2a '
+                                                                                                    'autoencoder.html#convolutionalautoencoder.load',
+                                                                                                    'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.ConvolutionalAutoEncoder.register_hook': ( '2a '
+                                                                                                             'autoencoder.html#convolutionalautoencoder.register_hook',
+                                                                                                             'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DerrickTheAutoencoder': ( '2a autoencoder.html#derricktheautoencoder',
+                                                                                            'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DerrickTheAutoencoder.__init__': ( '2a '
+                                                                                                     'autoencoder.html#derricktheautoencoder.__init__',
+                                                                                                     'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DerrickTheAutoencoder.configure_optimizers': ( '2a '
+                                                                                                                 'autoencoder.html#derricktheautoencoder.configure_optimizers',
+                                                                                                                 'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DerrickTheAutoencoder.forward': ( '2a '
+                                                                                                    'autoencoder.html#derricktheautoencoder.forward',
+                                                                                                    'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DerrickTheAutoencoder.immersion': ( '2a '
+                                                                                                      'autoencoder.html#derricktheautoencoder.immersion',
+                                                                                                      'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DerrickTheAutoencoder.test_step': ( '2a '
+                                                                                                      'autoencoder.html#derricktheautoencoder.test_step',
+                                                                                                      'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DerrickTheAutoencoder.training_step': ( '2a '
+                                                                                                          'autoencoder.html#derricktheautoencoder.training_step',
+                                                                                                          'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DerrickTheAutoencoder.validation_step': ( '2a '
+                                                                                                            'autoencoder.html#derricktheautoencoder.validation_step',
+                                                                                                            'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.LinearAE': ('2a autoencoder.html#linearae', 'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.LinearAE.__init__': ( '2a autoencoder.html#linearae.__init__',
+                                                                                        'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.LinearAE.decode': ( '2a autoencoder.html#linearae.decode',
+                                                                                      'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.LinearAE.encode': ( '2a autoencoder.html#linearae.encode',
+                                                                                      'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.LinearAE.forward': ( '2a autoencoder.html#linearae.forward',
+                                                                                       'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.Print': ('2a autoencoder.html#print', 'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.Print.__init__': ( '2a autoencoder.html#print.__init__',
+                                                                                     'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.Print.forward': ( '2a autoencoder.html#print.forward',
+                                                                                    'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.VanillaAutoencoderModel': ( '2a autoencoder.html#vanillaautoencodermodel',
+                                                                                              'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.VanillaAutoencoderModel.__init__': ( '2a '
+                                                                                                       'autoencoder.html#vanillaautoencodermodel.__init__',
+                                                                                                       'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.VanillaAutoencoderModel.decode': ( '2a '
+                                                                                                     'autoencoder.html#vanillaautoencodermodel.decode',
+                                                                                                     'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.VanillaAutoencoderModel.encode': ( '2a '
+                                                                                                     'autoencoder.html#vanillaautoencodermodel.encode',
+                                                                                                     'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.VanillaAutoencoderModel.forward': ( '2a '
+                                                                                                      'autoencoder.html#vanillaautoencodermodel.forward',
+                                                                                                      'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.View': ('2a autoencoder.html#view', 'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.View.__init__': ( '2a autoencoder.html#view.__init__',
+                                                                                    'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.View.forward': ( '2a autoencoder.html#view.forward',
+                                                                                   'autometric/autoencoders.py')},
+            'autometric.connections': { 'autometric.connections.LeviCivitaConnection': ( '1a levi-cevita '
+                                                                                         'connection.html#levicivitaconnection',
+                                                                                         'autometric/connections.py'),
+                                        'autometric.connections.LeviCivitaConnection.__init__': ( '1a levi-cevita '
+                                                                                                  'connection.html#levicivitaconnection.__init__',
+                                                                                                  'autometric/connections.py'),
+                                        'autometric.connections.LeviCivitaConnection.christoffels': ( '1a levi-cevita '
+                                                                                                      'connection.html#levicivitaconnection.christoffels',
+                                                                                                      'autometric/connections.py'),
+                                        'autometric.connections.LeviCivitaConnection.geodesic': ( '1a levi-cevita '
+                                                                                                  'connection.html#levicivitaconnection.geodesic',
+                                                                                                  'autometric/connections.py')},
+            'autometric.core': {'autometric.core.foo': ('core.html#foo', 'autometric/core.py')},
+            'autometric.manifolds': { 'autometric.manifolds.RiemannianManifold': ( '1c riemannian manifolds.html#riemannianmanifold',
+                                                                                   'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.__init__': ( '1c riemannian '
+                                                                                            'manifolds.html#riemannianmanifold.__init__',
+                                                                                            'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.belongs': ( '1c riemannian '
+                                                                                           'manifolds.html#riemannianmanifold.belongs',
+                                                                                           'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.christoffel_derivative': ( '1c riemannian '
+                                                                                                          'manifolds.html#riemannianmanifold.christoffel_derivative',
+                                                                                                          'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.generate_unit_vectors': ( '1c riemannian '
+                                                                                                         'manifolds.html#riemannianmanifold.generate_unit_vectors',
+                                                                                                         'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.is_tangent': ( '1c riemannian '
+                                                                                              'manifolds.html#riemannianmanifold.is_tangent',
+                                                                                              'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.k_scalar_curvature': ( '1c riemannian '
+                                                                                                      'manifolds.html#riemannianmanifold.k_scalar_curvature',
+                                                                                                      'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.metric_det': ( '1c riemannian '
+                                                                                              'manifolds.html#riemannianmanifold.metric_det',
+                                                                                              'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.metric_logdet': ( '1c riemannian '
+                                                                                                 'manifolds.html#riemannianmanifold.metric_logdet',
+                                                                                                 'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.random_point': ( '1c riemannian '
+                                                                                                'manifolds.html#riemannianmanifold.random_point',
+                                                                                                'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.ricci_tensor': ( '1c riemannian '
+                                                                                                'manifolds.html#riemannianmanifold.ricci_tensor',
+                                                                                                'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.riemannian_curvature': ( '1c riemannian '
+                                                                                                        'manifolds.html#riemannianmanifold.riemannian_curvature',
+                                                                                                        'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.riemannian_curvature_tensor': ( '1c riemannian '
+                                                                                                               'manifolds.html#riemannianmanifold.riemannian_curvature_tensor',
+                                                                                                               'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.scalar_curvature': ( '1c riemannian '
+                                                                                                    'manifolds.html#riemannianmanifold.scalar_curvature',
+                                                                                                    'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.sectional_curvature': ( '1c riemannian '
+                                                                                                       'manifolds.html#riemannianmanifold.sectional_curvature',
+                                                                                                       'autometric/manifolds.py'),
+                                      'autometric.manifolds.RiemannianManifold.to_tangent': ( '1c riemannian '
+                                                                                              'manifolds.html#riemannianmanifold.to_tangent',
+                                                                                              'autometric/manifolds.py')},
+            'autometric.metrics': { 'autometric.metrics.PullbackMetric': ( '1b pullback metric.html#pullbackmetric',
+                                                                           'autometric/metrics.py'),
+                                    'autometric.metrics.PullbackMetric.__init__': ( '1b pullback metric.html#pullbackmetric.__init__',
+                                                                                    'autometric/metrics.py'),
+                                    'autometric.metrics.PullbackMetric.christoffels': ( '1b pullback '
+                                                                                        'metric.html#pullbackmetric.christoffels',
+                                                                                        'autometric/metrics.py'),
+                                    'autometric.metrics.PullbackMetric.cometric_matrix': ( '1b pullback '
+                                                                                           'metric.html#pullbackmetric.cometric_matrix',
+                                                                                           'autometric/metrics.py'),
+                                    'autometric.metrics.PullbackMetric.inner_product': ( '1b pullback '
+                                                                                         'metric.html#pullbackmetric.inner_product',
+                                                                                         'autometric/metrics.py'),
+                                    'autometric.metrics.PullbackMetric.metric_matrix': ( '1b pullback '
+                                                                                         'metric.html#pullbackmetric.metric_matrix',
+                                                                                         'autometric/metrics.py'),
+                                    'autometric.metrics.PullbackMetric.metric_matrix_derivative': ( '1b pullback '
+                                                                                                    'metric.html#pullbackmetric.metric_matrix_derivative',
+                                                                                                    'autometric/metrics.py'),
+                                    'autometric.metrics.PullbackMetric.norm': ( '1b pullback metric.html#pullbackmetric.norm',
+                                                                                'autometric/metrics.py'),
+                                    'autometric.metrics.PullbackMetric.normalize': ( '1b pullback metric.html#pullbackmetric.normalize',
+                                                                                     'autometric/metrics.py')},
+            'autometric.util': { 'autometric.util.Color': ('util.html#color', 'autometric/util.py'),
+                                 'autometric.util.batch_jacobian': ('util.html#batch_jacobian', 'autometric/util.py'),
+                                 'autometric.util.cmap_labels': ('util.html#cmap_labels', 'autometric/util.py'),
+                                 'autometric.util.determine_scaling_fn': ('util.html#determine_scaling_fn', 'autometric/util.py'),
+                                 'autometric.util.get_coordinates': ('util.html#get_coordinates', 'autometric/util.py'),
+                                 'autometric.util.get_hull': ('util.html#get_hull', 'autometric/util.py'),
+                                 'autometric.util.get_next_digit': ('util.html#get_next_digit', 'autometric/util.py'),
+                                 'autometric.util.get_saving_kwargs': ('util.html#get_saving_kwargs', 'autometric/util.py'),
+                                 'autometric.util.get_sc_kwargs': ('util.html#get_sc_kwargs', 'autometric/util.py'),
+                                 'autometric.util.get_significant': ('util.html#get_significant', 'autometric/util.py'),
+                                 'autometric.util.in_hull': ('util.html#in_hull', 'autometric/util.py'),
+                                 'autometric.util.minmax': ('util.html#minmax', 'autometric/util.py'),
+                                 'autometric.util.pathpatch_2d_to_3d': ('util.html#pathpatch_2d_to_3d', 'autometric/util.py'),
+                                 'autometric.util.pathpatch_translate': ('util.html#pathpatch_translate', 'autometric/util.py'),
+                                 'autometric.util.rotation_matrix': ('util.html#rotation_matrix', 'autometric/util.py'),
+                                 'autometric.util.round_significant': ('util.html#round_significant', 'autometric/util.py'),
+                                 'autometric.util.symlog': ('util.html#symlog', 'autometric/util.py'),
+                                 'autometric.util.symlog_inv': ('util.html#symlog_inv', 'autometric/util.py'),
+                                 'autometric.util.transform_axes': ('util.html#transform_axes', 'autometric/util.py'),
+                                 'autometric.util.values_in_quantile': ('util.html#values_in_quantile', 'autometric/util.py')}}}
