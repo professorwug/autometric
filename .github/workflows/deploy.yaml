@@ -19,7 +19,7 @@ jobs:
       - name: Activate conda env with environment.yml
         uses: mamba-org/setup-micromamba@v1
         with:
-          micromamba-version: '1.6.0'
+          micromamba-version: 'latest'
           environment-file: env.yml
           init-shell: >-
             bash
