@@ -5,7 +5,15 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://professorwug.github.io',
                 'git_url': 'https://github.com/professorwug/autometric',
                 'lib_path': 'autometric'},
-  'syms': { 'autometric.0d1_branching_datasets': { 'autometric.0d1_branching_datasets.Stick': ( '0d1 branching datasets.html#stick',
+  'syms': { 'autometric.0d1_branching_datasets': { 'autometric.0d1_branching_datasets.Branch': ( '0d1 branching datasets.html#branch',
+                                                                                                 'autometric/0d1_branching_datasets.py'),
+                                                   'autometric.0d1_branching_datasets.Branch.__init__': ( '0d1 branching '
+                                                                                                          'datasets.html#branch.__init__',
+                                                                                                          'autometric/0d1_branching_datasets.py'),
+                                                   'autometric.0d1_branching_datasets.Branch.sample': ( '0d1 branching '
+                                                                                                        'datasets.html#branch.sample',
+                                                                                                        'autometric/0d1_branching_datasets.py'),
+                                                   'autometric.0d1_branching_datasets.Stick': ( '0d1 branching datasets.html#stick',
                                                                                                 'autometric/0d1_branching_datasets.py'),
                                                    'autometric.0d1_branching_datasets.Stick.__init__': ( '0d1 branching '
                                                                                                          'datasets.html#stick.__init__',
@@ -104,6 +112,36 @@ d = { 'settings': { 'branch': 'main',
                                          'autometric.autoencoders.DerrickTheAutoencoder.validation_step': ( '2a '
                                                                                                             'autoencoder.html#derricktheautoencoder.validation_step',
                                                                                                             'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder': ( '2a '
+                                                                                                  'autoencoder.html#distancematchingautoencoder',
+                                                                                                  'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.__init__': ( '2a '
+                                                                                                           'autoencoder.html#distancematchingautoencoder.__init__',
+                                                                                                           'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.configure_optimizers': ( '2a '
+                                                                                                                       'autoencoder.html#distancematchingautoencoder.configure_optimizers',
+                                                                                                                       'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.distance_loss': ( '2a '
+                                                                                                                'autoencoder.html#distancematchingautoencoder.distance_loss',
+                                                                                                                'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.forward': ( '2a '
+                                                                                                          'autoencoder.html#distancematchingautoencoder.forward',
+                                                                                                          'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.immersion': ( '2a '
+                                                                                                            'autoencoder.html#distancematchingautoencoder.immersion',
+                                                                                                            'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.step': ( '2a '
+                                                                                                       'autoencoder.html#distancematchingautoencoder.step',
+                                                                                                       'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.test_step': ( '2a '
+                                                                                                            'autoencoder.html#distancematchingautoencoder.test_step',
+                                                                                                            'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.training_step': ( '2a '
+                                                                                                                'autoencoder.html#distancematchingautoencoder.training_step',
+                                                                                                                'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.DistanceMatchingAutoencoder.validation_step': ( '2a '
+                                                                                                                  'autoencoder.html#distancematchingautoencoder.validation_step',
+                                                                                                                  'autometric/autoencoders.py'),
                                          'autometric.autoencoders.LinearAE': ('2a autoencoder.html#linearae', 'autometric/autoencoders.py'),
                                          'autometric.autoencoders.LinearAE.__init__': ( '2a autoencoder.html#linearae.__init__',
                                                                                         'autometric/autoencoders.py'),
@@ -150,6 +188,21 @@ d = { 'settings': { 'branch': 'main',
                                                                                                   'connection.html#levicivitaconnection.geodesic',
                                                                                                   'autometric/connections.py')},
             'autometric.core': {'autometric.core.foo': ('core.html#foo', 'autometric/core.py')},
+            'autometric.datasets': { 'autometric.datasets.PointcloudWithDistancesDataset': ( '0d '
+                                                                                             'datasets.html#pointcloudwithdistancesdataset',
+                                                                                             'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudWithDistancesDataset.__getitem__': ( '0d '
+                                                                                                         'datasets.html#pointcloudwithdistancesdataset.__getitem__',
+                                                                                                         'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudWithDistancesDataset.__init__': ( '0d '
+                                                                                                      'datasets.html#pointcloudwithdistancesdataset.__init__',
+                                                                                                      'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudWithDistancesDataset.__len__': ( '0d '
+                                                                                                     'datasets.html#pointcloudwithdistancesdataset.__len__',
+                                                                                                     'autometric/datasets.py'),
+                                     'autometric.datasets.dataloader_from_pointcloud_with_distances': ( '0d '
+                                                                                                        'datasets.html#dataloader_from_pointcloud_with_distances',
+                                                                                                        'autometric/datasets.py')},
             'autometric.manifolds': { 'autometric.manifolds.RiemannianManifold': ( '1c riemannian manifolds.html#riemannianmanifold',
                                                                                    'autometric/manifolds.py'),
                                       'autometric.manifolds.RiemannianManifold.__init__': ( '1c riemannian '
@@ -220,6 +273,28 @@ d = { 'settings': { 'branch': 'main',
                                                                                 'autometric/metrics.py'),
                                     'autometric.metrics.PullbackMetric.normalize': ( '1b pullback metric.html#pullbackmetric.normalize',
                                                                                      'autometric/metrics.py')},
+            'autometric.n0d1_branching_datasets': { 'autometric.n0d1_branching_datasets.Branch': ( '0d1 branching datasets.html#branch',
+                                                                                                   'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.Branch.__init__': ( '0d1 branching '
+                                                                                                            'datasets.html#branch.__init__',
+                                                                                                            'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.Branch.sample': ( '0d1 branching '
+                                                                                                          'datasets.html#branch.sample',
+                                                                                                          'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.Stick': ( '0d1 branching datasets.html#stick',
+                                                                                                  'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.Stick.__init__': ( '0d1 branching '
+                                                                                                           'datasets.html#stick.__init__',
+                                                                                                           'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.Stick.end_point': ( '0d1 branching '
+                                                                                                            'datasets.html#stick.end_point',
+                                                                                                            'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.Stick.sample': ( '0d1 branching '
+                                                                                                         'datasets.html#stick.sample',
+                                                                                                         'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.Stick.sample_at_time': ( '0d1 branching '
+                                                                                                                 'datasets.html#stick.sample_at_time',
+                                                                                                                 'autometric/n0d1_branching_datasets.py')},
             'autometric.util': { 'autometric.util.Color': ('util.html#color', 'autometric/util.py'),
                                  'autometric.util.batch_jacobian': ('util.html#batch_jacobian', 'autometric/util.py'),
                                  'autometric.util.cmap_labels': ('util.html#cmap_labels', 'autometric/util.py'),

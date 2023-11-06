@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['AutoencoderModel', 'View', 'Print', 'BoxAutoEncoder', 'ConvolutionalAutoEncoder', 'LinearAE',
-           'VanillaAutoencoderModel', 'DerrickTheAutoencoder']
+           'VanillaAutoencoderModel', 'DerrickTheAutoencoder', 'DistanceMatchingAutoencoder']
 
 # %% ../nbs/2a autoencoder.ipynb 1
 """
@@ -470,6 +470,92 @@ class DerrickTheAutoencoder(pl.LightningModule):
         self.log('test_loss', loss)
         return loss
     
+    
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
+
+
+# %% ../nbs/2a autoencoder.ipynb 8
+import torch
+import torch.nn as nn
+import pytorch_lightning as pl
+
+class DistanceMatchingAutoencoder(pl.LightningModule):
+    """
+    What if you already know what your latent space should look like, but want to learn a differentiable mapping into it?
+    Enter the DistanceMatchingAutoencoder, or DISMA for short. In addition to a mean squared error loss, it also penalizes the difference between the pairwise distances of the embedding and the supplied ground truth.
+
+    Each minibatch from the dataloader is assumed to have the following keys:
+    - `x`: the input data
+    - `d`: the ground truth pairwise distances
+    """
+    def __init__(self, input_dim, intrinsic_dimension, learning_rate=1e-3, reconstruction_weight=1, distance_weight=1):
+        super().__init__()
+        self.intrinsic_dimension = intrinsic_dimension
+        self.lr = learning_rate
+        self.reconstruction_weight = reconstruction_weight
+        self.distance_weight = distance_weight
+        self.encoder = nn.Sequential(
+            nn.Linear(in_features=input_dim, out_features=256),
+            nn.ELU(),
+            nn.Linear(in_features=256, out_features=128),
+            nn.ELU(),
+            nn.Linear(in_features=128, out_features=64),
+            nn.ELU(),
+            nn.Linear(in_features=64, out_features=intrinsic_dimension)
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(in_features=intrinsic_dimension, out_features=64),
+            nn.ELU(),
+            nn.Linear(in_features=64, out_features=128),
+            nn.ELU(),
+            nn.Linear(in_features=128, out_features=256),
+            nn.ELU(),
+            nn.Linear(in_features=256, out_features=input_dim)
+        )
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
+    
+    def immersion(self, x):
+        """The immersion defined by the autoencoder (or more precisely, the decoder)."""
+        return self.decoder(x)
+
+    def distance_loss(self, x_embedded, ground_truth_distances):
+        embedding_distances = torch.cdist(x_embedded, x_embedded)
+        prepared_embedded = torch.log(embedding_distances + torch.eye(embedding_distances.shape[0]))        
+        prepared_truth = torch.log(ground_truth_distances + torch.eye(ground_truth_distances.shape[0]))
+        return nn.MSELoss()(prepared_embedded, prepared_truth)
+
+    def step(self, batch, batch_idx):
+        x = batch['x']
+        d = batch['d']
+        x_embedded = self.encoder(x)
+        x_hat = self.decoder(x_embedded)
+        recon_loss = nn.MSELoss()(x_hat, x)
+        dist_loss = self.distance_loss(x_embedded, d)
+        loss = self.reconstruction_weight * recon_loss + self.distance_weight * dist_loss
+        return loss
+
+
+    def training_step(self, batch, batch_idx):
+        loss = self.step(batch, batch_idx)
+        self.log('train_loss', loss, prog_bar=True, on_epoch=True)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        loss = self.step(batch, batch_idx)
+        self.log('val_loss', loss, prog_bar=True, on_epoch=True)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        loss = self.step(batch, batch_idx)
+        self.log('test_loss', loss, prog_bar=True, on_epoch=True)
+        return loss
     
 
     def configure_optimizers(self):
