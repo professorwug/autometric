@@ -5,7 +5,21 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://professorwug.github.io',
                 'git_url': 'https://github.com/professorwug/autometric',
                 'lib_path': 'autometric'},
-  'syms': { 'autometric.autoencoders': { 'autometric.autoencoders.AutoencoderModel': ( '2a autoencoder.html#autoencodermodel',
+  'syms': { 'autometric.0d1_branching_datasets': { 'autometric.0d1_branching_datasets.Stick': ( '0d1 branching datasets.html#stick',
+                                                                                                'autometric/0d1_branching_datasets.py'),
+                                                   'autometric.0d1_branching_datasets.Stick.__init__': ( '0d1 branching '
+                                                                                                         'datasets.html#stick.__init__',
+                                                                                                         'autometric/0d1_branching_datasets.py'),
+                                                   'autometric.0d1_branching_datasets.Stick.end_point': ( '0d1 branching '
+                                                                                                          'datasets.html#stick.end_point',
+                                                                                                          'autometric/0d1_branching_datasets.py'),
+                                                   'autometric.0d1_branching_datasets.Stick.sample': ( '0d1 branching '
+                                                                                                       'datasets.html#stick.sample',
+                                                                                                       'autometric/0d1_branching_datasets.py'),
+                                                   'autometric.0d1_branching_datasets.Stick.sample_at_time': ( '0d1 branching '
+                                                                                                               'datasets.html#stick.sample_at_time',
+                                                                                                               'autometric/0d1_branching_datasets.py')},
+            'autometric.autoencoders': { 'autometric.autoencoders.AutoencoderModel': ( '2a autoencoder.html#autoencodermodel',
                                                                                        'autometric/autoencoders.py'),
                                          'autometric.autoencoders.AutoencoderModel.decode': ( '2a autoencoder.html#autoencodermodel.decode',
                                                                                               'autometric/autoencoders.py'),

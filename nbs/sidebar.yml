@@ -2,6 +2,8 @@ website:
   sidebar:
     contents:
       - index.ipynb
+      - 0d Datasets.ipynb
+      - 0d1 Branching Datasets.ipynb
       - 1 Geometer's Delight.ipynb
       - 1a Levi-Cevita Connection.ipynb
       - 1b Pullback Metric.ipynb
