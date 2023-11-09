@@ -202,7 +202,10 @@ d = { 'settings': { 'branch': 'main',
                                                                                                      'autometric/datasets.py'),
                                      'autometric.datasets.dataloader_from_pointcloud_with_distances': ( '0d '
                                                                                                         'datasets.html#dataloader_from_pointcloud_with_distances',
-                                                                                                        'autometric/datasets.py')},
+                                                                                                        'autometric/datasets.py'),
+                                     'autometric.datasets.train_and_testloader_from_pointcloud_with_distances': ( '0d '
+                                                                                                                  'datasets.html#train_and_testloader_from_pointcloud_with_distances',
+                                                                                                                  'autometric/datasets.py')},
             'autometric.manifolds': { 'autometric.manifolds.RiemannianManifold': ( '1c riemannian manifolds.html#riemannianmanifold',
                                                                                    'autometric/manifolds.py'),
                                       'autometric.manifolds.RiemannianManifold.__init__': ( '1c riemannian '
@@ -281,6 +284,18 @@ d = { 'settings': { 'branch': 'main',
                                                     'autometric.n0d1_branching_datasets.Branch.sample': ( '0d1 branching '
                                                                                                           'datasets.html#branch.sample',
                                                                                                           'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.BranchBattery': ( '0d1 branching '
+                                                                                                          'datasets.html#branchbattery',
+                                                                                                          'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.BranchBattery.__init__': ( '0d1 branching '
+                                                                                                                   'datasets.html#branchbattery.__init__',
+                                                                                                                   'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.BranchBattery.__iter__': ( '0d1 branching '
+                                                                                                                   'datasets.html#branchbattery.__iter__',
+                                                                                                                   'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.BranchBattery.__next__': ( '0d1 branching '
+                                                                                                                   'datasets.html#branchbattery.__next__',
+                                                                                                                   'autometric/n0d1_branching_datasets.py'),
                                                     'autometric.n0d1_branching_datasets.Stick': ( '0d1 branching datasets.html#stick',
                                                                                                   'autometric/n0d1_branching_datasets.py'),
                                                     'autometric.n0d1_branching_datasets.Stick.__init__': ( '0d1 branching '
@@ -289,12 +304,18 @@ d = { 'settings': { 'branch': 'main',
                                                     'autometric.n0d1_branching_datasets.Stick.end_point': ( '0d1 branching '
                                                                                                             'datasets.html#stick.end_point',
                                                                                                             'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.Stick.length': ( '0d1 branching '
+                                                                                                         'datasets.html#stick.length',
+                                                                                                         'autometric/n0d1_branching_datasets.py'),
                                                     'autometric.n0d1_branching_datasets.Stick.sample': ( '0d1 branching '
                                                                                                          'datasets.html#stick.sample',
                                                                                                          'autometric/n0d1_branching_datasets.py'),
                                                     'autometric.n0d1_branching_datasets.Stick.sample_at_time': ( '0d1 branching '
                                                                                                                  'datasets.html#stick.sample_at_time',
-                                                                                                                 'autometric/n0d1_branching_datasets.py')},
+                                                                                                                 'autometric/n0d1_branching_datasets.py'),
+                                                    'autometric.n0d1_branching_datasets.create_branch_battery': ( '0d1 branching '
+                                                                                                                  'datasets.html#create_branch_battery',
+                                                                                                                  'autometric/n0d1_branching_datasets.py')},
             'autometric.util': { 'autometric.util.Color': ('util.html#color', 'autometric/util.py'),
                                  'autometric.util.batch_jacobian': ('util.html#batch_jacobian', 'autometric/util.py'),
                                  'autometric.util.cmap_labels': ('util.html#cmap_labels', 'autometric/util.py'),

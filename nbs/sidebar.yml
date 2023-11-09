@@ -9,7 +9,10 @@ website:
       - 1b Pullback Metric.ipynb
       - 1c Riemannian Manifolds.ipynb
       - 2a autoencoder.ipynb
+      - 2a1 Training Example.ipynb
       - 2b Criteria.ipynb
       - 3a Sphere Experiment.ipynb
       - 3b PHATE-conditioned Embedding Analysis.ipynb
+      - 3c Branch Comparisons.ipynb
+      - 3c1 Training AEs on Branches.ipynb
       - util.ipynb
