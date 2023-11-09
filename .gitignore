@@ -1,6 +1,8 @@
 _docs/
 _proc/
 data/
+lightning_logs/
+nbs/lightning_logs/
 
 *.bak
 .gitattributes
