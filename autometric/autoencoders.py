@@ -50,7 +50,7 @@ class DerrickTheAutoencoder(pl.LightningModule):
         x = batch
         x_hat = self(x)
         loss = nn.MSELoss()(x_hat, x)
-        self.log('train_loss', loss, prog_bar=True, on_epoch=True)
+        self.log('train_loss', loss, prog_bar=False, on_epoch=True)
         return loss
     
     def validation_step(self, batch, batch_idx):
@@ -90,6 +90,7 @@ class DistanceMatchingAutoencoder(pl.LightningModule):
     """
     def __init__(self, input_dim, intrinsic_dim, learning_rate=1e-3, reconstruction_weight=1, distance_weight=1):
         super().__init__()
+        self.input_dim = input_dim
         self.intrinsic_dimension = intrinsic_dim
         self.lr = learning_rate
         self.reconstruction_weight = reconstruction_weight

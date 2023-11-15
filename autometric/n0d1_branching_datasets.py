@@ -53,6 +53,7 @@ class Stick():
 # %% ../nbs/0d1 Branching Datasets.ipynb 6
 import random
 import numpy as np
+import torch
 class Branch():
     def __init__(
         self,
@@ -101,11 +102,12 @@ class Branch():
 
     def sample(self,n_samples=5000):
         Xs = []
+        samples_per_stick = n_samples // len(self.sticks)
         for i, stick in enumerate(self.sticks):
-            Xs.append(np.vstack([stick.sample(n_samples-1),stick.end_point()]))
+            Xs.append(np.vstack([stick.sample(samples_per_stick-1),stick.end_point()]))
             self.num_branches_per_point.append(np.append(np.zeros(n_samples-1), self.branching_nums[i]))
             self.branch_lengths.append(
-                np.ones(n_samples)*stick.length()
+                np.ones(samples_per_stick)*stick.length()
             )
         self.num_branches_per_point = np.concatenate(self.num_branches_per_point)
         self.branch_lengths = np.concatenate(self.branch_lengths)
@@ -155,7 +157,7 @@ def create_branch_battery(
 
 # %% ../nbs/0d1 Branching Datasets.ipynb 19
 import h5py
-class BranchBattery:
+class BranchBattery():
     def __init__(self, data_path = "../data/branch_battery.h5"):
         self.data_path = data_path
         self.BB = h5py.File(data_path,'r')

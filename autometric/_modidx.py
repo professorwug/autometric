@@ -206,6 +206,7 @@ d = { 'settings': { 'branch': 'main',
                                      'autometric.datasets.train_and_testloader_from_pointcloud_with_distances': ( '0d '
                                                                                                                   'datasets.html#train_and_testloader_from_pointcloud_with_distances',
                                                                                                                   'autometric/datasets.py')},
+            'autometric.geometry': {},
             'autometric.manifolds': { 'autometric.manifolds.RiemannianManifold': ( '1c riemannian manifolds.html#riemannianmanifold',
                                                                                    'autometric/manifolds.py'),
                                       'autometric.manifolds.RiemannianManifold.__init__': ( '1c riemannian '
@@ -316,6 +317,28 @@ d = { 'settings': { 'branch': 'main',
                                                     'autometric.n0d1_branching_datasets.create_branch_battery': ( '0d1 branching '
                                                                                                                   'datasets.html#create_branch_battery',
                                                                                                                   'autometric/n0d1_branching_datasets.py')},
+            'autometric.n1d_embedding_analysis': { 'autometric.n1d_embedding_analysis.determinants_of_encoder_pullback': ( '1d embedding '
+                                                                                                                           'analysis.html#determinants_of_encoder_pullback',
+                                                                                                                           'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.evals_of_encoder_pullback': ( '1d embedding '
+                                                                                                                    'analysis.html#evals_of_encoder_pullback',
+                                                                                                                    'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.rank_of_encoder_pullback': ( '1d embedding '
+                                                                                                                   'analysis.html#rank_of_encoder_pullback',
+                                                                                                                   'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.spectral_entropy_of_encoder_pullback': ( '1d '
+                                                                                                                               'embedding '
+                                                                                                                               'analysis.html#spectral_entropy_of_encoder_pullback',
+                                                                                                                               'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.spectral_entropy_of_matrix': ( '1d embedding '
+                                                                                                                     'analysis.html#spectral_entropy_of_matrix',
+                                                                                                                     'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.trace_of_encoder_pullback': ( '1d embedding '
+                                                                                                                    'analysis.html#trace_of_encoder_pullback',
+                                                                                                                    'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.visualize_encoder_pullback_metrics': ( '1d embedding '
+                                                                                                                             'analysis.html#visualize_encoder_pullback_metrics',
+                                                                                                                             'autometric/n1d_embedding_analysis.py')},
             'autometric.util': { 'autometric.util.Color': ('util.html#color', 'autometric/util.py'),
                                  'autometric.util.batch_jacobian': ('util.html#batch_jacobian', 'autometric/util.py'),
                                  'autometric.util.cmap_labels': ('util.html#cmap_labels', 'autometric/util.py'),
@@ -335,4 +358,6 @@ d = { 'settings': { 'branch': 'main',
                                  'autometric.util.symlog': ('util.html#symlog', 'autometric/util.py'),
                                  'autometric.util.symlog_inv': ('util.html#symlog_inv', 'autometric/util.py'),
                                  'autometric.util.transform_axes': ('util.html#transform_axes', 'autometric/util.py'),
-                                 'autometric.util.values_in_quantile': ('util.html#values_in_quantile', 'autometric/util.py')}}}
+                                 'autometric.util.values_in_quantile': ('util.html#values_in_quantile', 'autometric/util.py')},
+            'autometric.utils': { 'autometric.utils.printnum': ('0u utils.html#printnum', 'autometric/utils.py'),
+                                  'autometric.utils.visualize_embedding': ('0u utils.html#visualize_embedding', 'autometric/utils.py')}}}

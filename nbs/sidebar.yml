@@ -4,15 +4,19 @@ website:
       - index.ipynb
       - 0d Datasets.ipynb
       - 0d1 Branching Datasets.ipynb
+      - 0u Utils.ipynb
       - 1 Geometer's Delight.ipynb
       - 1a Levi-Cevita Connection.ipynb
       - 1b Pullback Metric.ipynb
       - 1c Riemannian Manifolds.ipynb
+      - 1d Embedding Analysis.ipynb
       - 2a autoencoder.ipynb
       - 2a1 Training Example.ipynb
       - 2b Criteria.ipynb
       - 3a Sphere Experiment.ipynb
       - 3b PHATE-conditioned Embedding Analysis.ipynb
+      - 3b1 PHATE Embedding of Paraboloid.ipynb
+      - 3b2 UMAP Embeddings.ipynb
       - 3c Branch Comparisons.ipynb
       - 3c1 Training AEs on Branches.ipynb
       - util.ipynb
