@@ -3,7 +3,8 @@
 # %% auto 0
 __all__ = ['determinants_of_encoder_pullback', 'trace_of_encoder_pullback', 'rank_of_encoder_pullback',
            'spectral_entropy_of_matrix', 'spectral_entropy_of_encoder_pullback', 'evals_of_encoder_pullback',
-           'visualize_encoder_pullback_metrics']
+           'smallest_eigenvector', 'normal_vectors_of_encoder_pullback', 'visualize_encoder_pullback_metrics',
+           'visualize_encoder_pullback_metrics_in_ambient_space']
 
 # %% ../nbs/1d Embedding Analysis.ipynb 4
 from .metrics import PullbackMetric
@@ -65,7 +66,33 @@ def evals_of_encoder_pullback(model, dataloader):
     e = [np.sort(np.linalg.eigvals(G))[::-1] for G in Gs]
     return np.vstack(e)
 
-# %% ../nbs/1d Embedding Analysis.ipynb 10
+# %% ../nbs/1d Embedding Analysis.ipynb 9
+def smallest_eigenvector(matrix):
+    """
+    Find the eigenvector associated with the smallest eigenvalue of a square matrix.
+
+    Args:
+        matrix (np.array): A square numpy array representing a matrix.
+
+    Returns:
+        np.array: The eigenvector associated with the smallest eigenvalue.
+    """
+    # Compute eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = np.linalg.eig(matrix)
+
+    # Find the index of the smallest eigenvalue
+    min_index = np.argmin(eigenvalues)
+
+    # Return the corresponding eigenvector
+    return eigenvectors[:, min_index]
+def normal_vectors_of_encoder_pullback(model, dataloader):
+    # returns the determinants of the metric matrices for each point in the dataset
+    Metric = PullbackMetric(model.input_dim, model.encoder)
+    Gs = Metric.metric_matrix(dataloader.dataset.pointcloud).detach().cpu().numpy()
+    e = [smallest_eigenvector(G) for G in Gs]
+    return np.vstack(e)
+
+# %% ../nbs/1d Embedding Analysis.ipynb 11
 import matplotlib.pyplot as plt
 import numpy
 from .utils import *
@@ -94,4 +121,39 @@ def visualize_encoder_pullback_metrics(model, dataloader, title):
     
     fig.suptitle(title)
     plt.tight_layout()
+    plt.show()
+
+# %% ../nbs/1d Embedding Analysis.ipynb 12
+import matplotlib.pyplot as plt
+import numpy
+from .utils import *
+from mpl_toolkits.mplot3d import Axes3D
+
+def visualize_encoder_pullback_metrics_in_ambient_space(model, dataloader, title):
+    X = model.encoder(dataloader.dataset.pointcloud).cpu().detach().numpy()
+    D = dataloader.dataset.pointcloud.cpu().detach().numpy()
+    figure = plt.figure()
+
+    ax = figure.add_subplot(231, projection='3d')
+    spectral_entropy = spectral_entropy_of_encoder_pullback(model,dataloader)
+    ax.scatter(D[:,0],D[:,1],D[:,2],c=spectral_entropy)
+    ax.set_title("Spectral Entropy")
+
+    ax = figure.add_subplot(232, projection='3d')
+    trace = trace_of_encoder_pullback(model,dataloader)
+    ax.scatter(D[:,0],D[:,1],D[:,2],c=trace)
+    ax.set_title("Trace")
+
+    ax = figure.add_subplot(233, projection='3d')
+    rank = rank_of_encoder_pullback(model,dataloader)
+    ax.scatter(D[:,0],D[:,1],D[:,2],c=rank)
+    ax.set_title("Rank")
+    
+    evals = evals_of_encoder_pullback(model, dataloader)
+    for i in range(3):
+        ax = figure.add_subplot(230+i+4, projection='3d')
+        ax.scatter(D[:,0],D[:,1],D[:,2],c=evals[:,i])
+        ax.set_title(f"{printnum(i)} Eigenvalue")
+    
+    figure.suptitle(title)
     plt.show()
