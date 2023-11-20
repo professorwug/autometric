@@ -3,127 +3,12 @@
   {
    "cell_type": "code",
    "execution_count": 1,
-   "id": "0f7ff678",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|default_exp utils\n",
-    "import numpy as np\n",
-    "import matplotlib.pyplot as plt\n",
-    "import deepdish\n",
-    "\n",
-    "import os\n",
-    "os.environ[\"GEOMSTATS_BACKEND\"] = \"pytorch\"\n",
-    "\n",
-    "# models\n",
-    "import torch\n",
-    "\n",
-    "%load_ext autoreload\n",
-    "%autoreload 2"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "id": "04930f4e",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|export\n",
-    "import numpy as np\n",
-    "import torch\n",
-    "import matplotlib.pyplot as plt\n",
-    "# visualize the latent embedding space of a pytorch model, colored by a given vector\n",
-    "def visualize_embedding(\n",
-    "    model,\n",
-    "    dataloader,\n",
-    "    colors=None,\n",
-    "    title = \"Embedded Points\"\n",
-    "):\n",
-    "    if colors is None:\n",
-    "        colors = np.zeros(len(dataloader.dataset))\n",
-    "    model.eval()\n",
-    "\n",
-    "    embeddings = model.encoder(dataloader.dataset.pointcloud).cpu().detach().numpy()\n",
-    "    \n",
-    "    plt.figure(figsize=(10, 10))\n",
-    "    plt.scatter(embeddings[:, 0], embeddings[:, 1], c=colors, cmap=\"viridis\")\n",
-    "    plt.title(title)\n",
-    "    plt.colorbar()\n",
-    "    plt.show()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 3,
-   "id": "343551ad",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|utils\n",
-    "def print_number_with_suffix(number):\n",
-    "    suffixes = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th']\n",
-    "    if 10 <= number % 100 <= 20:\n",
-    "        suffix = 'th'\n",
-    "    else:\n",
-    "        suffix = suffixes[number % 10]\n",
-    "    print(f\"{number}{suffix}\")"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 4,
-   "id": "ae7a2241",
+   "id": "370d3ff4",
    "metadata": {},
    "outputs": [],
    "source": [
     "%notebook save\n",
     "!nbdev_export"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 5,
-   "id": "d8ea3e72",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|utils\n",
-    "def printnum(number):\n",
-    "    suffixes = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th']\n",
-    "    if 10 <= number % 100 <= 20:\n",
-    "        suffix = 'th'\n",
-    "    else:\n",
-    "        suffix = suffixes[number % 10]\n",
-    "    return f\"{number}{suffix}\""
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 6,
-   "id": "ba4c7613",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "%notebook save\n",
-    "!nbdev_export"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 7,
-   "id": "5efa1795",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|export\n",
-    "def printnum(number):\n",
-    "    suffixes = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th']\n",
-    "    if 10 <= number % 100 <= 20:\n",
-    "        suffix = 'th'\n",
-    "    else:\n",
-    "        suffix = suffixes[number % 10]\n",
-    "    return f\"{number}{suffix}\""
    ]
   }
  ],
