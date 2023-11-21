@@ -373,4 +373,5 @@ d = { 'settings': { 'branch': 'main',
                                  'autometric.util.transform_axes': ('util.html#transform_axes', 'autometric/util.py'),
                                  'autometric.util.values_in_quantile': ('util.html#values_in_quantile', 'autometric/util.py')},
             'autometric.utils': { 'autometric.utils.printnum': ('0u utils.html#printnum', 'autometric/utils.py'),
-                                  'autometric.utils.visualize_embedding': ('0u utils.html#visualize_embedding', 'autometric/utils.py')}}}
+                                  'autometric.utils.visualize_embedding': ('0u utils.html#visualize_embedding', 'autometric/utils.py')},
+            'autometric.visualization_tools': {}}}
