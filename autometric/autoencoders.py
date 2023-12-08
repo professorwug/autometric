@@ -2,8 +2,8 @@
 
 # %% auto 0
 __all__ = ['DerrickTheAutoencoder', 'DistanceMatchingAutoencoder', 'CoordinatewiseDistanceMatchingAutoencoder',
-           'AutoencoderModel', 'View', 'Print', 'BoxAutoEncoder', 'ConvolutionalAutoEncoder', 'LinearAE',
-           'VanillaAutoencoderModel']
+           'FlexibleDMAutoencoder', 'AutoencoderModel', 'View', 'Print', 'BoxAutoEncoder', 'ConvolutionalAutoEncoder',
+           'LinearAE', 'VanillaAutoencoderModel']
 
 # %% ../nbs/2a autoencoder.ipynb 1
 import torch
@@ -186,7 +186,59 @@ class CoordinatewiseDistanceMatchingAutoencoder(DistanceMatchingAutoencoder):
         # self.log('train_loss', loss)
         return loss
 
-# %% ../nbs/2a autoencoder.ipynb 8
+# %% ../nbs/2a autoencoder.ipynb 6
+class FlexibleDMAutoencoder(DistanceMatchingAutoencoder):
+    def __init__(self, input_dim, intrinsic_dim, learning_rate=0.001, reconstruction_weight=1, distance_weight=1, coordinatewise=False, pretrain=False):
+        super().__init__(input_dim, intrinsic_dim, learning_rate, reconstruction_weight, distance_weight)
+        self.coordinatewise = coordinatewise
+        self.pretrain = pretrain
+    
+    def distance_loss_coorw(self, x_embedded, phate_coords):
+        phate_coords_permuted = phate_coords.unsqueeze(0).permute(2, 1, 0)
+        ground_truth_distances = torch.cdist(phate_coords_permuted, phate_coords_permuted)
+        x_embedded_permuted = x_embedded.unsqueeze(0).permute(2, 1, 0)
+        embedding_distances = torch.cdist(x_embedded_permuted, x_embedded_permuted)
+        prepared_embedded = torch.log(embedding_distances + torch.eye(embedding_distances.shape[1], device=x_embedded.device) + 1e-10)        
+        prepared_truth = torch.log(ground_truth_distances + torch.eye(ground_truth_distances.shape[1], device=x_embedded.device) + 1e-10)
+        return nn.MSELoss()(prepared_embedded, prepared_truth)
+    
+    def pretrain_loss(self, x_embedded, mds_coords):
+        return nn.MSELoss()(x_embedded, mds_coords)
+        
+    def step(self, batch, batch_idx):
+        x = batch['x']
+        x_embedded = self.encoder(x)
+        x_hat = self.decoder(x_embedded)
+        recon_loss = nn.MSELoss()(x_hat, x)
+        if self.pretrain:
+            mds_coords = batch['m']
+            dist_loss = self.pretrain_loss(x_embedded, mds_coords)
+        elif self.coordinatewise:
+            phate_coords = batch['p']
+            dist_loss = self.distance_loss_coorw(x_embedded, phate_coords)
+        else:
+            d = batch['d']
+            dist_loss = self.distance_loss(x_embedded, d)
+        loss = self.reconstruction_weight * recon_loss + self.distance_weight * dist_loss
+        return loss
+
+    def set_pretrain(self, distance_weight, reconstruction_weight):
+        self.pretrain = True
+        self.distance_weight = distance_weight
+        self.reconstruction_weight = reconstruction_weight
+
+    def set_finetune(self, distance_weight, reconstruction_weight, coordinatewise):
+        self.pretrain = False
+        self.distance_weight = distance_weight
+        self.reconstruction_weight = reconstruction_weight
+        self.coordinatewise = coordinatewise
+    
+    def set_coordinatewise(self):
+        self.coordinatewise = True
+    
+
+
+# %% ../nbs/2a autoencoder.ipynb 9
 """
 THIS FILE WAS TAKEN FROM https://github.com/BorgwardtLab/topological-autoencoders
 """
@@ -226,7 +278,7 @@ class AutoencoderModel(nn.Module, metaclass=abc.ABCMeta):
         return self.decoder(x)
 
 
-# %% ../nbs/2a autoencoder.ipynb 9
+# %% ../nbs/2a autoencoder.ipynb 10
 """
 THIS FILE WAS PARTLY TAKEN FROM https://github.com/BorgwardtLab/topological-autoencoders
 """
@@ -541,7 +593,7 @@ class LinearAE(AutoencoderModel):
         return reconst_error, {'reconstruction_error': reconst_error}
 
 
-# %% ../nbs/2a autoencoder.ipynb 11
+# %% ../nbs/2a autoencoder.ipynb 12
 """
 THIS FILE WAS PARTLY TAKEN FROM https://github.com/BorgwardtLab/topological-autoencoders
 """

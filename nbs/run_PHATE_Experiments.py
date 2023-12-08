@@ -7,19 +7,25 @@ import argparse
 parser = argparse.ArgumentParser(description='PHATE Embedding Experiment')
 parser.add_argument('--datasetname', type=str, default='swiss_roll', help='Name of the dataset')
 parser.add_argument('--reconstruction_weight', type=float, default=1, help='Weight for reconstruction loss')
-parser.add_argument('--dist_loss_fn', type=str, default='coordinatewise', help='Distance loss function')
+parser.add_argument('--include_pretraining', action='store_true', help='Whether to include pretraining')
+parser.add_argument('--coordinatewise', action='store_true', help='Whether to use coordinatewise loss')
+parser.add_argument('--savepath', type=str, default='../data_phate_flex', help='Path to save data')
 args = parser.parse_args()
 
 datasetname = args.datasetname
 reconstruction_weight = args.reconstruction_weight
-dist_loss_fn = args.dist_loss_fn
+include_pretraining = args.include_pretraining
+coordinatewise = args.coordinatewise
+savepath = args.savepath
 
 distance_weight = 1
 
 run_PHATE_embedding_experiment(
     datasetname,
-    distance_weight=distance_weight,
-    reconstruction_weight=reconstruction_weight,
-    dist_loss_fn=dist_loss_fn,
-    savepath='../data_phate_experiments/'
+    distance_weight = distance_weight,
+    reconstruction_weight = reconstruction_weight,
+    coordinatewise = coordinatewise,
+    include_pretraining = include_pretraining,
+    savepath = savepath,
+    max_epochs = 50,
 )

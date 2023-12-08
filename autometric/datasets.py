@@ -4,7 +4,8 @@
 __all__ = ['PointcloudWithDistancesDataset', 'dataloader_from_pointcloud_with_distances',
            'train_and_testloader_from_pointcloud_with_distances', 'PointcloudWithPHATECoordsDataset',
            'dataloader_from_pointcloud_with_phate_coords', 'train_and_testloader_from_pointcloud_phate_coords',
-           'nd_saddle', 'plot_3d_vector_field']
+           'FlexiblePCDataset', 'dataloader_from_flexpc', 'train_and_testloader_from_flexpc', 'nd_saddle',
+           'plot_3d_vector_field']
 
 # %% ../nbs/0d Datasets.ipynb 2
 import torch
@@ -82,14 +83,63 @@ def train_and_testloader_from_pointcloud_phate_coords(
     testloader = dataloader_from_pointcloud_with_phate_coords(X_test, P_test, batch_size)
     return trainloader, testloader
 
-# %% ../nbs/0d Datasets.ipynb 8
-from .n0d1_branching_datasets import *
+# %% ../nbs/0d Datasets.ipynb 7
+class FlexiblePCDataset(torch.utils.data.Dataset):
+    """
+    Flexible Point Cloud Dataset
+    """
+    def __init__(self, pointcloud, mcoordinates, pcoordinates, pdistances, batch_size = 64):
+        self.pointcloud = torch.tensor(pointcloud, dtype=torch.float32)
+        self.mds_coordinates = torch.tensor(mcoordinates, dtype=torch.float32)
+        self.phate_coordinates = torch.tensor(pcoordinates, dtype=torch.float32)
+        self.phate_distances = torch.tensor(pdistances, dtype=torch.float32)
+        self.batch_size = batch_size
+
+    def __len__(self):
+        return len(self.pointcloud)
+    
+    def __getitem__(self, idx):
+        batch_idxs = torch.randperm(len(self.pointcloud))[:self.batch_size]
+        batch = {}
+        batch['x'] = self.pointcloud[batch_idxs]
+        batch['p'] = self.phate_coordinates[batch_idxs]
+        batch['d'] = self.phate_distances[batch_idxs][:,batch_idxs]
+        batch['m'] = self.mds_coordinates[batch_idxs]
+        return batch
+
+def dataloader_from_flexpc(pointcloud, mcoordinates, pcoordinates, pdistances, batch_size = 64):
+    dataset = FlexiblePCDataset(pointcloud, mcoordinates, pcoordinates, pdistances, batch_size)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=None, shuffle=True)
+    return dataloader
+
+def train_and_testloader_from_flexpc(
+    pointcloud, mcoordinates, pcoordinates, pdistances, batch_size = 64, train_test_split = 0.8
+):
+    X = pointcloud
+    M = mcoordinates
+    P = pcoordinates
+    D = pdistances
+    split_idx = int(len(X)*train_test_split)
+    X_train = X[:split_idx]
+    X_test = X[split_idx:]
+    M_train = M[:split_idx]
+    M_test = M[split_idx:]
+    D_train = D[:split_idx,:split_idx]
+    D_test = D[split_idx:,split_idx:]
+    P_train = P[:split_idx]
+    P_test = P[split_idx:]
+    trainloader = dataloader_from_flexpc(X_train, M_train, P_train, D_train, batch_size)
+    testloader = dataloader_from_flexpc(X_test, M_test, P_test, D_test, batch_size)
+    return trainloader, testloader
 
 # %% ../nbs/0d Datasets.ipynb 9
+from .n0d1_branching_datasets import *
+
+# %% ../nbs/0d Datasets.ipynb 11
 from diffusion_curvature.datasets import *
 from diffusion_curvature.utils import plot_3d
 
-# %% ../nbs/0d Datasets.ipynb 10
+# %% ../nbs/0d Datasets.ipynb 12
 import sympy as sp
 import numpy as np
 from diffusion_curvature.random_surfaces import rejection_sample_from_surface, scalar_curvature_at_origin
@@ -119,7 +169,7 @@ def nd_saddle(n_samples=1000, intrinsic_dim = 2, verbose=False, intensity=1, ret
             normal_vecs[i] = np.squeeze(orthogonal_vector / np.linalg.norm(orthogonal_vector))
         return points, normal_vecs
 
-# %% ../nbs/0d Datasets.ipynb 12
+# %% ../nbs/0d Datasets.ipynb 14
 import numpy as np
 import plotly.graph_objects as go
 import chart_studio
