@@ -89,6 +89,18 @@ d = { 'settings': { 'branch': 'main',
                                          'autometric.autoencoders.ConvolutionalAutoEncoder.register_hook': ( '2a '
                                                                                                              'autoencoder.html#convolutionalautoencoder.register_hook',
                                                                                                              'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.CoordinatewiseDistanceMatchingAutoencoder': ( '2a '
+                                                                                                                'autoencoder.html#coordinatewisedistancematchingautoencoder',
+                                                                                                                'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.CoordinatewiseDistanceMatchingAutoencoder.__init__': ( '2a '
+                                                                                                                         'autoencoder.html#coordinatewisedistancematchingautoencoder.__init__',
+                                                                                                                         'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.CoordinatewiseDistanceMatchingAutoencoder.distance_loss': ( '2a '
+                                                                                                                              'autoencoder.html#coordinatewisedistancematchingautoencoder.distance_loss',
+                                                                                                                              'autometric/autoencoders.py'),
+                                         'autometric.autoencoders.CoordinatewiseDistanceMatchingAutoencoder.step': ( '2a '
+                                                                                                                     'autoencoder.html#coordinatewisedistancematchingautoencoder.step',
+                                                                                                                     'autometric/autoencoders.py'),
                                          'autometric.autoencoders.DerrickTheAutoencoder': ( '2a autoencoder.html#derricktheautoencoder',
                                                                                             'autometric/autoencoders.py'),
                                          'autometric.autoencoders.DerrickTheAutoencoder.__init__': ( '2a '
@@ -200,12 +212,30 @@ d = { 'settings': { 'branch': 'main',
                                      'autometric.datasets.PointcloudWithDistancesDataset.__len__': ( '0d '
                                                                                                      'datasets.html#pointcloudwithdistancesdataset.__len__',
                                                                                                      'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudWithPHATECoordsDataset': ( '0d '
+                                                                                               'datasets.html#pointcloudwithphatecoordsdataset',
+                                                                                               'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudWithPHATECoordsDataset.__getitem__': ( '0d '
+                                                                                                           'datasets.html#pointcloudwithphatecoordsdataset.__getitem__',
+                                                                                                           'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudWithPHATECoordsDataset.__init__': ( '0d '
+                                                                                                        'datasets.html#pointcloudwithphatecoordsdataset.__init__',
+                                                                                                        'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudWithPHATECoordsDataset.__len__': ( '0d '
+                                                                                                       'datasets.html#pointcloudwithphatecoordsdataset.__len__',
+                                                                                                       'autometric/datasets.py'),
                                      'autometric.datasets.dataloader_from_pointcloud_with_distances': ( '0d '
                                                                                                         'datasets.html#dataloader_from_pointcloud_with_distances',
                                                                                                         'autometric/datasets.py'),
+                                     'autometric.datasets.dataloader_from_pointcloud_with_phate_coords': ( '0d '
+                                                                                                           'datasets.html#dataloader_from_pointcloud_with_phate_coords',
+                                                                                                           'autometric/datasets.py'),
                                      'autometric.datasets.nd_saddle': ('0d datasets.html#nd_saddle', 'autometric/datasets.py'),
                                      'autometric.datasets.plot_3d_vector_field': ( '0d datasets.html#plot_3d_vector_field',
                                                                                    'autometric/datasets.py'),
+                                     'autometric.datasets.train_and_testloader_from_pointcloud_phate_coords': ( '0d '
+                                                                                                                'datasets.html#train_and_testloader_from_pointcloud_phate_coords',
+                                                                                                                'autometric/datasets.py'),
                                      'autometric.datasets.train_and_testloader_from_pointcloud_with_distances': ( '0d '
                                                                                                                   'datasets.html#train_and_testloader_from_pointcloud_with_distances',
                                                                                                                   'autometric/datasets.py')},
@@ -320,6 +350,29 @@ d = { 'settings': { 'branch': 'main',
                                                     'autometric.n0d1_branching_datasets.create_branch_battery': ( '0d1 branching '
                                                                                                                   'datasets.html#create_branch_battery',
                                                                                                                   'autometric/n0d1_branching_datasets.py')},
+            'autometric.n0d2_datasets': { 'autometric.n0d2_datasets.generate_sine_wave_dataset': ( '0d2 some example '
+                                                                                                   'datasets.html#generate_sine_wave_dataset',
+                                                                                                   'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.make_swiss_roll': ( '0d2 some example datasets.html#make_swiss_roll',
+                                                                                        'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.moon_petals': ( '0d2 some example datasets.html#moon_petals',
+                                                                                    'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.petals': ( '0d2 some example datasets.html#petals',
+                                                                               'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.sinewave_petals': ( '0d2 some example datasets.html#sinewave_petals',
+                                                                                        'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.spiral': ( '0d2 some example datasets.html#spiral',
+                                                                               'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.sprial_petals': ( '0d2 some example datasets.html#sprial_petals',
+                                                                                      'autometric/n0d2_datasets.py')},
+            'autometric.n0u1_visualization': { 'autometric.n0u1_visualization.plot_jacobian': ( '0u1 visualization.html#plot_jacobian',
+                                                                                                'autometric/n0u1_visualization.py'),
+                                               'autometric.n0u1_visualization.plot_jacobian_multi': ( '0u1 '
+                                                                                                      'visualization.html#plot_jacobian_multi',
+                                                                                                      'autometric/n0u1_visualization.py')},
+            'autometric.n0u2_jacobian': { 'autometric.n0u2_jacobian.compute_jacobian_function': ( '0u2 '
+                                                                                                  'jacobian.html#compute_jacobian_function',
+                                                                                                  'autometric/n0u2_jacobian.py')},
             'autometric.n1d_embedding_analysis': { 'autometric.n1d_embedding_analysis.determinants_of_encoder_pullback': ( '1d embedding '
                                                                                                                            'analysis.html#determinants_of_encoder_pullback',
                                                                                                                            'autometric/n1d_embedding_analysis.py'),
@@ -352,6 +405,11 @@ d = { 'settings': { 'branch': 'main',
                                                                                                                                               'embedding '
                                                                                                                                               'analysis.html#visualize_encoder_pullback_metrics_in_ambient_space',
                                                                                                                                               'autometric/n1d_embedding_analysis.py')},
+            'autometric.n3b7_phate_embedding_experiments': { 'autometric.n3b7_phate_embedding_experiments.run_PHATE_embedding_experiment': ( '3b7 '
+                                                                                                                                             'phate '
+                                                                                                                                             'embedding '
+                                                                                                                                             'experiments.html#run_phate_embedding_experiment',
+                                                                                                                                             'autometric/n3b7_phate_embedding_experiments.py')},
             'autometric.util': { 'autometric.util.Color': ('util.html#color', 'autometric/util.py'),
                                  'autometric.util.batch_jacobian': ('util.html#batch_jacobian', 'autometric/util.py'),
                                  'autometric.util.cmap_labels': ('util.html#cmap_labels', 'autometric/util.py'),
@@ -373,5 +431,4 @@ d = { 'settings': { 'branch': 'main',
                                  'autometric.util.transform_axes': ('util.html#transform_axes', 'autometric/util.py'),
                                  'autometric.util.values_in_quantile': ('util.html#values_in_quantile', 'autometric/util.py')},
             'autometric.utils': { 'autometric.utils.printnum': ('0u utils.html#printnum', 'autometric/utils.py'),
-                                  'autometric.utils.visualize_embedding': ('0u utils.html#visualize_embedding', 'autometric/utils.py')},
-            'autometric.visualization_tools': {}}}
+                                  'autometric.utils.visualize_embedding': ('0u utils.html#visualize_embedding', 'autometric/utils.py')}}}
