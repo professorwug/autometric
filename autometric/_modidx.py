@@ -188,6 +188,43 @@ d = { 'settings': { 'branch': 'main',
                                                                                                   'connection.html#levicivitaconnection.geodesic',
                                                                                                   'autometric/connections.py')},
             'autometric.core': {'autometric.core.foo': ('core.html#foo', 'autometric/core.py')},
+            'autometric.criteria': { 'autometric.criteria.determinants_of_encoder_pullback': ( '1d embedding '
+                                                                                               'analysis.html#determinants_of_encoder_pullback',
+                                                                                               'autometric/criteria.py'),
+                                     'autometric.criteria.evals_of_encoder_pullback': ( '1d embedding '
+                                                                                        'analysis.html#evals_of_encoder_pullback',
+                                                                                        'autometric/criteria.py'),
+                                     'autometric.criteria.frequency_of_volume_variance': ( '1d embedding '
+                                                                                           'analysis.html#frequency_of_volume_variance',
+                                                                                           'autometric/criteria.py'),
+                                     'autometric.criteria.indicatrix_volume_variance_metric': ( '1d embedding '
+                                                                                                'analysis.html#indicatrix_volume_variance_metric',
+                                                                                                'autometric/criteria.py'),
+                                     'autometric.criteria.normal_vectors_of_encoder_pullback': ( '1d embedding '
+                                                                                                 'analysis.html#normal_vectors_of_encoder_pullback',
+                                                                                                 'autometric/criteria.py'),
+                                     'autometric.criteria.plot_indicatrices': ( '1d embedding analysis.html#plot_indicatrices',
+                                                                                'autometric/criteria.py'),
+                                     'autometric.criteria.rank_of_encoder_pullback': ( '1d embedding '
+                                                                                       'analysis.html#rank_of_encoder_pullback',
+                                                                                       'autometric/criteria.py'),
+                                     'autometric.criteria.smallest_eigenvector': ( '1d embedding analysis.html#smallest_eigenvector',
+                                                                                   'autometric/criteria.py'),
+                                     'autometric.criteria.spectral_entropy_of_encoder_pullback': ( '1d embedding '
+                                                                                                   'analysis.html#spectral_entropy_of_encoder_pullback',
+                                                                                                   'autometric/criteria.py'),
+                                     'autometric.criteria.spectral_entropy_of_matrix': ( '1d embedding '
+                                                                                         'analysis.html#spectral_entropy_of_matrix',
+                                                                                         'autometric/criteria.py'),
+                                     'autometric.criteria.trace_of_encoder_pullback': ( '1d embedding '
+                                                                                        'analysis.html#trace_of_encoder_pullback',
+                                                                                        'autometric/criteria.py'),
+                                     'autometric.criteria.visualize_encoder_pullback_metrics': ( '1d embedding '
+                                                                                                 'analysis.html#visualize_encoder_pullback_metrics',
+                                                                                                 'autometric/criteria.py'),
+                                     'autometric.criteria.visualize_encoder_pullback_metrics_in_ambient_space': ( '1d embedding '
+                                                                                                                  'analysis.html#visualize_encoder_pullback_metrics_in_ambient_space',
+                                                                                                                  'autometric/criteria.py')},
             'autometric.datasets': { 'autometric.datasets.PointcloudDataset': ( '0d datasets.html#pointclouddataset',
                                                                                 'autometric/datasets.py'),
                                      'autometric.datasets.PointcloudDataset.__getitem__': ( '0d '

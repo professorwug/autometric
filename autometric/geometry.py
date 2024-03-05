@@ -4,7 +4,7 @@
 __all__ = []
 
 # %% ../nbs/1 Geometer's Delight.ipynb 3
-from .n1d_embedding_analysis import *
+from .criteria import *
 from .connections import *
 from .metrics import *
 from .manifolds import *
