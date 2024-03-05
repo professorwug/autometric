@@ -188,7 +188,16 @@ d = { 'settings': { 'branch': 'main',
                                                                                                   'connection.html#levicivitaconnection.geodesic',
                                                                                                   'autometric/connections.py')},
             'autometric.core': {'autometric.core.foo': ('core.html#foo', 'autometric/core.py')},
-            'autometric.datasets': { 'autometric.datasets.PointcloudWithDistancesDataset': ( '0d '
+            'autometric.datasets': { 'autometric.datasets.PointcloudDataset': ( '0d datasets.html#pointclouddataset',
+                                                                                'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudDataset.__getitem__': ( '0d '
+                                                                                            'datasets.html#pointclouddataset.__getitem__',
+                                                                                            'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudDataset.__init__': ( '0d datasets.html#pointclouddataset.__init__',
+                                                                                         'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudDataset.__len__': ( '0d datasets.html#pointclouddataset.__len__',
+                                                                                        'autometric/datasets.py'),
+                                     'autometric.datasets.PointcloudWithDistancesDataset': ( '0d '
                                                                                              'datasets.html#pointcloudwithdistancesdataset',
                                                                                              'autometric/datasets.py'),
                                      'autometric.datasets.PointcloudWithDistancesDataset.__getitem__': ( '0d '
@@ -206,6 +215,8 @@ d = { 'settings': { 'branch': 'main',
                                      'autometric.datasets.nd_saddle': ('0d datasets.html#nd_saddle', 'autometric/datasets.py'),
                                      'autometric.datasets.plot_3d_vector_field': ( '0d datasets.html#plot_3d_vector_field',
                                                                                    'autometric/datasets.py'),
+                                     'autometric.datasets.sphere_with_normals': ( '0d datasets.html#sphere_with_normals',
+                                                                                  'autometric/datasets.py'),
                                      'autometric.datasets.train_and_testloader_from_pointcloud_with_distances': ( '0d '
                                                                                                                   'datasets.html#train_and_testloader_from_pointcloud_with_distances',
                                                                                                                   'autometric/datasets.py')},
@@ -326,9 +337,18 @@ d = { 'settings': { 'branch': 'main',
                                                    'autometric.n1d_embedding_analysis.evals_of_encoder_pullback': ( '1d embedding '
                                                                                                                     'analysis.html#evals_of_encoder_pullback',
                                                                                                                     'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.frequency_of_volume_variance': ( '1d embedding '
+                                                                                                                       'analysis.html#frequency_of_volume_variance',
+                                                                                                                       'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.indicatrix_volume_variance_metric': ( '1d embedding '
+                                                                                                                            'analysis.html#indicatrix_volume_variance_metric',
+                                                                                                                            'autometric/n1d_embedding_analysis.py'),
                                                    'autometric.n1d_embedding_analysis.normal_vectors_of_encoder_pullback': ( '1d embedding '
                                                                                                                              'analysis.html#normal_vectors_of_encoder_pullback',
                                                                                                                              'autometric/n1d_embedding_analysis.py'),
+                                                   'autometric.n1d_embedding_analysis.plot_indicatrices': ( '1d embedding '
+                                                                                                            'analysis.html#plot_indicatrices',
+                                                                                                            'autometric/n1d_embedding_analysis.py'),
                                                    'autometric.n1d_embedding_analysis.rank_of_encoder_pullback': ( '1d embedding '
                                                                                                                    'analysis.html#rank_of_encoder_pullback',
                                                                                                                    'autometric/n1d_embedding_analysis.py'),

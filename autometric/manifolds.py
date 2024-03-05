@@ -242,7 +242,7 @@ class RiemannianManifold(Manifold):
         """
 
         # the angles
-        phi = torch.linspace(0., 2 * np.pi, n, device=device)
+        phi = torch.linspace(0., 2 * np.pi, n)
 
         # generate circular vector patch
         raw_vectors = torch.stack([torch.sin(phi), torch.cos(phi)])
