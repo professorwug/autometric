@@ -331,6 +331,29 @@ d = { 'settings': { 'branch': 'main',
                                                     'autometric.n0d1_branching_datasets.create_branch_battery': ( '0d1 branching '
                                                                                                                   'datasets.html#create_branch_battery',
                                                                                                                   'autometric/n0d1_branching_datasets.py')},
+            'autometric.n0d2_datasets': { 'autometric.n0d2_datasets.generate_sine_wave_dataset': ( '0d2 some example '
+                                                                                                   'datasets.html#generate_sine_wave_dataset',
+                                                                                                   'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.make_swiss_roll': ( '0d2 some example datasets.html#make_swiss_roll',
+                                                                                        'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.moon_petals': ( '0d2 some example datasets.html#moon_petals',
+                                                                                    'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.petals': ( '0d2 some example datasets.html#petals',
+                                                                               'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.sinewave_petals': ( '0d2 some example datasets.html#sinewave_petals',
+                                                                                        'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.spiral': ( '0d2 some example datasets.html#spiral',
+                                                                               'autometric/n0d2_datasets.py'),
+                                          'autometric.n0d2_datasets.sprial_petals': ( '0d2 some example datasets.html#sprial_petals',
+                                                                                      'autometric/n0d2_datasets.py')},
+            'autometric.n0u1_visualization': { 'autometric.n0u1_visualization.plot_jacobian': ( '0u1 visualization.html#plot_jacobian',
+                                                                                                'autometric/n0u1_visualization.py'),
+                                               'autometric.n0u1_visualization.plot_jacobian_multi': ( '0u1 '
+                                                                                                      'visualization.html#plot_jacobian_multi',
+                                                                                                      'autometric/n0u1_visualization.py')},
+            'autometric.n0u2_jacobian': { 'autometric.n0u2_jacobian.compute_jacobian_function': ( '0u2 '
+                                                                                                  'jacobian.html#compute_jacobian_function',
+                                                                                                  'autometric/n0u2_jacobian.py')},
             'autometric.n1d_embedding_analysis': { 'autometric.n1d_embedding_analysis.determinants_of_encoder_pullback': ( '1d embedding '
                                                                                                                            'analysis.html#determinants_of_encoder_pullback',
                                                                                                                            'autometric/n1d_embedding_analysis.py'),
@@ -393,5 +416,4 @@ d = { 'settings': { 'branch': 'main',
                                  'autometric.util.transform_axes': ('util.html#transform_axes', 'autometric/util.py'),
                                  'autometric.util.values_in_quantile': ('util.html#values_in_quantile', 'autometric/util.py')},
             'autometric.utils': { 'autometric.utils.printnum': ('0u utils.html#printnum', 'autometric/utils.py'),
-                                  'autometric.utils.visualize_embedding': ('0u utils.html#visualize_embedding', 'autometric/utils.py')},
-            'autometric.visualization_tools': {}}}
+                                  'autometric.utils.visualize_embedding': ('0u utils.html#visualize_embedding', 'autometric/utils.py')}}}
