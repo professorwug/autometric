@@ -1,0 +1,88 @@
+
+[project]
+name = "autometric"
+version = "0.1.0"
+description = "riemannian metrics for representation learning"
+authors = ["Kincaid MacDonald <dev@riddle.press>"]
+# channels = ["nvidia/label/cuda-12.1.0", "nvidia", "conda-forge", "pytorch"]
+# add with `pixi project channel add nvidia`; searches in left-most channels first and stops when the package is found. Best to order by recency of update, with pytorch at the end.
+channels = ["nvidia", "conda-forge", "fastai", "pytorch"]
+platforms = ["linux-64"]
+
+[tasks]
+# install the library in editable mode; make kernel available to jupyter
+postinstall = "pip install --no-build-isolation --no-deps --disable-pip-version-check --editable src && python -m ipykernel install --user --name autometric"
+
+# test the installation
+test_import = "python -c 'import autometric'"
+# NBDev shorthands
+nbsync = "nbdev_export" # export code from notebooks into the library
+nbclean = "nbdev_clean" # remove extraneous notebook metadata to reduce git conflicts
+pysync = "nbdev_update" # sync changes from library to notebooks
+docmaker = "nbdev_docs" # build docs
+zettelmaker = "quarto render nbs/experiments --to gfm --no-execute --output-dir ../zettels --profile zettels" # export experiments to markdown with quarto
+notebooks = "jupyter lab --ip=0.0.0.0"
+
+
+[dependencies]
+python = "3.11.*"
+
+# # Common & Ubiquitous
+pytorch = {version = ">=2.0.1", channel = "pytorch"}
+# torchvision = {version = ">=0.15", channel = "pytorch"}
+polars = ">=0.20,<0.21"
+matplotlib-base = ">=3.8.2,<3.9"
+ipykernel = ">=6.28.0,<6.29"
+numpy = ">=1.26.4,<1.27"
+notebook = ">=7.0.7,<7.1"
+nbformat = ">=5.9.2,<5.10"
+seaborn = ">=0.13.2,<0.14"
+scipy = ">=1.12.0,<1.13"
+pandas = ">=2.2.0,<2.3"
+matplotlib = ">=3.8.2,<3.9"
+jupyter = ">=1.0.0,<1.1"
+rich = ">=13.7.0,<13.8"
+typer = ">=0.9.0,<0.10"
+sympy = ">=1.12,<2"
+plotly = ">=5.18.0,<5.19"
+tqdm = ">=4.66.1,<4.67"
+
+# Literate Programming
+nbdev = "2.2.10.*"
+fastcore = "1.5.29.*"
+
+# Project Specific
+geomstats = "==2.5.0"
+
+# [pypi-dependencies]
+# scikit-dimension = "==0.3.*"
+# tadasets = "*"
+# phate = "*"
+# pykeops = "*" # currently a bug in pixi preventing installation - but you can 'pixi shell' then 'pip install'.
+
+# Pixi Features allow sets of packages to be installed on systems that meet requirements
+[feature.cuda]
+platforms = ["linux-64"]
+channels = ["nvidia", {channel = "pytorch", priority = -1}]
+system-requirements = {cuda = "12.1"}
+[feature.cuda.dependencies]
+pytorch-cuda = {version = "12.1.*", channel = "pytorch"}
+[feature.cuda.tasks]
+# test = "python test.py --cuda"
+
+# [feature.mlx]
+# platforms = ["osx-arm64"]
+# system-requirements = {macos = "13.3"}
+# [feature.mlx.dependencies]
+# mlx = "*"
+# [feature.mlx.tasks]
+
+# To install with an environment, run `pixi install -e env_name`
+# These environments let us specify which features to include
+[environments]
+cuda = ["cuda"]
+
+[pypi-dependencies]
+sympytorch = "*"
+chart-studio = "*"
+# mlx = ["mlx"]
