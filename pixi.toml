@@ -84,4 +84,5 @@ cuda = ["cuda"]
 
 [pypi-dependencies]
 sympytorch = "*"
+chart-studio = "*"
 # mlx = ["mlx"]
