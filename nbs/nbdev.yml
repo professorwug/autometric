@@ -1,9 +1,0 @@
-project:
-  output-dir: _docs
-
-website:
-  title: "autometric"
-  site-url: "https://professorwug.github.io/autometric"
-  description: "Using autoencoders to learn a pullback metric in embedding space"
-  repo-branch: main
-  repo-url: "https://github.com/professorwug/autometric"
