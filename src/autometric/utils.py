@@ -4,7 +4,7 @@
 __all__ = ['Color', 'get_sc_kwargs', 'get_saving_kwargs', 'get_coordinates', 'get_hull', 'in_hull', 'batch_jacobian', 'symlog',
            'symlog_inv', 'minmax', 'cmap_labels', 'values_in_quantile', 'determine_scaling_fn', 'transform_axes',
            'rotation_matrix', 'pathpatch_2d_to_3d', 'pathpatch_translate', 'get_significant', 'get_next_digit',
-           'round_significant', 'visualize_embedding', 'printnum', 'plot_3d']
+           'round_significant', 'visualize_embedding', 'printnum', 'plot_3d', 'gif_from_multiarray']
 
 # %% ../../nbs/library/util.ipynb 2
 """
@@ -588,3 +588,37 @@ def plot_3d(X,distribution=None, title="",lim=None,use_plotly=False, zlim = None
         ax.set_title(title)
         if colorbar: fig.colorbar(im, ax=ax)
         plt.show()
+
+# %% ../../nbs/library/util.ipynb 7
+from imageio import imread, mimwrite
+from IPython.display import Image
+import os
+import base64
+from IPython import display
+import shutil
+
+def gif_from_multiarray(data):
+    if not os.path.exists('tmp'):
+        os.makedirs('tmp')
+    # empty list to store images
+    images = []
+
+    for i in range(data.shape[0]): # for each sub-array
+        fig, ax = plt.subplots() # create a new figure and plot
+        im = ax.scatter(data[i][:,0], data[i][:,1])  # show the image data on the plot
+        
+        filename = f'tmp/frame_{i}.png' # save to tmp folder
+        plt.savefig(filename)    # save the figure to a temporary file
+        images.append(imread(filename)) # add the image to the list
+        plt.close()  # close the figure
+
+    # create gif with each image lasting for 0.2 seconds
+    mimwrite('result.gif', images, duration=5, loop=0)
+
+    # deletes tmp directory and all files inside it
+    shutil.rmtree('tmp')
+    # display inline
+    # display in jupyter notebook
+    with open('result.gif', 'rb') as fd:
+        b64 = base64.b64encode(fd.read()).decode('ascii')
+    return display.HTML(f'<img src="data:image/gif;base64,{b64}" loop/>')

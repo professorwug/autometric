@@ -232,13 +232,13 @@ class Sphere(ToyManifold):
         length = self.r * angle
         return length, great_circle_points
 
-# %% ../../nbs/library/datasets.ipynb 30
+# %% ../../nbs/library/datasets.ipynb 29
 class Hemisphere(Sphere):
     def __init__(self, num_points = 2000, r = 1):
         super().__init__(num_points, r)
         self.X = self.X[self.X[:,2] > 0]
 
-# %% ../../nbs/library/datasets.ipynb 34
+# %% ../../nbs/library/datasets.ipynb 32
 import torch
 
 class PointcloudDataset(torch.utils.data.Dataset):
@@ -267,13 +267,13 @@ class PointcloudWithDistancesDataset(torch.utils.data.Dataset):
         batch['d'] = self.distances[batch_idxs][:,batch_idxs]
         return batch
 
-# %% ../../nbs/library/datasets.ipynb 35
+# %% ../../nbs/library/datasets.ipynb 33
 def dataloader_from_pointcloud_with_distances(pointcloud, distances, batch_size = 64):
     dataset = PointcloudWithDistancesDataset(pointcloud, distances, batch_size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=None, shuffle=True)
     return dataloader
 
-# %% ../../nbs/library/datasets.ipynb 36
+# %% ../../nbs/library/datasets.ipynb 34
 def train_and_testloader_from_pointcloud_with_distances(
     pointcloud, distances, batch_size = 64, train_test_split = 0.8
 ):
@@ -288,10 +288,7 @@ def train_and_testloader_from_pointcloud_with_distances(
     testloader = dataloader_from_pointcloud_with_distances(X_test, D_test, batch_size)
     return trainloader, testloader
 
-# %% ../../nbs/library/datasets.ipynb 38
-from .branch_datasets import *
-
-# %% ../../nbs/library/datasets.ipynb 40
+# %% ../../nbs/library/datasets.ipynb 36
 import numpy as np
 import plotly.graph_objects as go
 import chart_studio
@@ -390,7 +387,7 @@ def plot_3d_vector_field(X, *vector_fields, names=None, arrow_length=0.5, upload
         print("Your plot is now live at ",url)
 
 
-# %% ../../nbs/library/datasets.ipynb 43
+# %% ../../nbs/library/datasets.ipynb 37
 def sphere_with_normals(
     n_points
 ):
@@ -398,7 +395,7 @@ def sphere_with_normals(
     N = X
     return X, N
 
-# %% ../../nbs/library/datasets.ipynb 46
+# %% ../../nbs/library/datasets.ipynb 39
 import os
 from fastcore.script import *
 
