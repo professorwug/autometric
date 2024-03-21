@@ -8,4 +8,4 @@ from .criteria import *
 from .connections import * 
 from .metrics import * 
 from .manifolds import *
-__all__ = ['criteria', 'connections', 'metrics', 'manifolds']
+__all__ = ['PullbackMetric', 'RiemannianManifold', 'LeviCivitaConnection', 'plot_indicatrices', 'indicatrix_volume_variance_metric', 'frequency_of_volume_variance', 'curvature_matching_metric']
