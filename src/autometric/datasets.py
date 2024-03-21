@@ -2,8 +2,9 @@
 
 # %% auto 0
 __all__ = ['manifold_density', 'max_value', 'rejection_sample_from_surface', 'ToyManifold', 'Torus', 'Saddle', 'Ellipsoid',
-           'PointcloudDataset', 'PointcloudWithDistancesDataset', 'dataloader_from_pointcloud_with_distances',
-           'train_and_testloader_from_pointcloud_with_distances', 'plot_3d_vector_field', 'sphere_with_normals']
+           'Sphere', 'Hemisphere', 'PointcloudDataset', 'PointcloudWithDistancesDataset',
+           'dataloader_from_pointcloud_with_distances', 'train_and_testloader_from_pointcloud_with_distances',
+           'plot_3d_vector_field', 'sphere_with_normals', 'export_datasets']
 
 # %% ../../nbs/library/datasets.ipynb 5
 import numpy as np
@@ -203,6 +204,41 @@ class Ellipsoid(ToyManifold):
         self.compute_metrics()
 
 # %% ../../nbs/library/datasets.ipynb 26
+class Sphere(ToyManifold):
+    def __init__(self, num_points = 2000, r = 1):
+        self.r = r
+        theta = sym.Symbol("theta")
+        phi = sym.Symbol("phi")
+        F = sym.Matrix(
+            [r*sym.cos(theta)*sym.sin(phi),r*sym.sin(theta)*sym.sin(phi),r*sym.cos(phi)]
+        )
+        super().__init__(F, [0.0,2*np.pi], num_points = num_points)
+        self.compute_metrics()
+    def geodesic(self, 
+                 a, # Coordinates in ambient space
+                 b, 
+                 tolerance = 0.02
+                 ):
+        """
+        Returns geodesic in ambient space between points a and b.
+        """
+        cross = torch.cross(a, b, dim=-1)
+        agreement_with_cross = torch.func.vmap(lambda x: torch.dot(cross, x))(self.X)
+        great_circle_points = self.X[torch.abs(agreement_with_cross) < tolerance]
+        # restrict to points on the right side
+        agreement_with_sign = torch.func.vmap(lambda x: torch.dot(a + b, x))(great_circle_points)
+        great_circle_points = great_circle_points[agreement_with_sign > 0]
+        angle = torch.linalg.norm(torch.cross(a, b, dim=-1))/self.r**2
+        length = self.r * angle
+        return length, great_circle_points
+
+# %% ../../nbs/library/datasets.ipynb 30
+class Hemisphere(Sphere):
+    def __init__(self, num_points = 2000, r = 1):
+        super().__init__(num_points, r)
+        self.X = self.X[self.X[:,2] > 0]
+
+# %% ../../nbs/library/datasets.ipynb 34
 import torch
 
 class PointcloudDataset(torch.utils.data.Dataset):
@@ -231,13 +267,13 @@ class PointcloudWithDistancesDataset(torch.utils.data.Dataset):
         batch['d'] = self.distances[batch_idxs][:,batch_idxs]
         return batch
 
-# %% ../../nbs/library/datasets.ipynb 27
+# %% ../../nbs/library/datasets.ipynb 35
 def dataloader_from_pointcloud_with_distances(pointcloud, distances, batch_size = 64):
     dataset = PointcloudWithDistancesDataset(pointcloud, distances, batch_size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=None, shuffle=True)
     return dataloader
 
-# %% ../../nbs/library/datasets.ipynb 28
+# %% ../../nbs/library/datasets.ipynb 36
 def train_and_testloader_from_pointcloud_with_distances(
     pointcloud, distances, batch_size = 64, train_test_split = 0.8
 ):
@@ -252,10 +288,10 @@ def train_and_testloader_from_pointcloud_with_distances(
     testloader = dataloader_from_pointcloud_with_distances(X_test, D_test, batch_size)
     return trainloader, testloader
 
-# %% ../../nbs/library/datasets.ipynb 30
+# %% ../../nbs/library/datasets.ipynb 38
 from .branch_datasets import *
 
-# %% ../../nbs/library/datasets.ipynb 32
+# %% ../../nbs/library/datasets.ipynb 40
 import numpy as np
 import plotly.graph_objects as go
 import chart_studio
@@ -354,10 +390,34 @@ def plot_3d_vector_field(X, *vector_fields, names=None, arrow_length=0.5, upload
         print("Your plot is now live at ",url)
 
 
-# %% ../../nbs/library/datasets.ipynb 35
+# %% ../../nbs/library/datasets.ipynb 43
 def sphere_with_normals(
     n_points
 ):
     X, ks = sphere(n_points)
     N = X
     return X, N
+
+# %% ../../nbs/library/datasets.ipynb 46
+import os
+from fastcore.script import *
+
+@call_parse
+def export_datasets(
+    foldername:str,
+    num_points:int = 2000, # Number of samples from each dataset 
+):
+    """
+    Saves all of the datasets above into npz files.
+    """
+    dsets = [
+        Sphere, Torus, Hemisphere, Saddle, Ellipsoid
+    ]
+    for dset in dsets:
+        D = dset(num_points = num_points)
+        np.savez(
+            os.path.join(foldername, f'{dset.__name__}.npz'), 
+            data = D.X.detach().numpy(), 
+            ks = D.ks.detach().numpy(),
+            colors = D.ks.detach().numpy(),
+        )

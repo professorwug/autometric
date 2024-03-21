@@ -24,7 +24,7 @@ UPPER_EPSILON = 1e20
 SMALLER_UPPER_EPSILON = 1e12
 
 
-os.environ["GEOMSTATS_BACKEND"] = "pytorch"
+# os.environ["GEOMSTATS_BACKEND"] = "pytorch"
 
 import torch
 from torch.func import jacrev, vmap

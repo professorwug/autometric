@@ -5,7 +5,8 @@ __all__ = ['determinants_of_encoder_pullback', 'trace_of_encoder_pullback', 'ran
            'spectral_entropy_of_matrix', 'spectral_entropy_of_encoder_pullback', 'evals_of_encoder_pullback',
            'smallest_eigenvector', 'normal_vectors_of_encoder_pullback', 'visualize_encoder_pullback_metrics',
            'visualize_encoder_pullback_metrics_in_ambient_space', 'plot_indicatrices',
-           'indicatrix_volume_variance_metric', 'frequency_of_volume_variance']
+           'indicatrix_volume_variance_metric', 'median_heuristic', 'gaussian_kernel', 'frequency_of_volume_variance',
+           'curvature_matching_metric']
 
 # %% ../../nbs/library/criteria.ipynb 6
 from .metrics import PullbackMetric
@@ -160,7 +161,7 @@ def visualize_encoder_pullback_metrics_in_ambient_space(model, dataloader, title
     plt.show()
 
 # %% ../../nbs/library/criteria.ipynb 17
-from .util import *
+from .utils import *
 from .connections import LeviCivitaConnection
 from .metrics import PullbackMetric
 from .manifolds import RiemannianManifold
@@ -357,8 +358,54 @@ def indicatrix_volume_variance_metric(
     return raw_loss
 
 # %% ../../nbs/library/criteria.ipynb 27
-from diffusion_curvature.kernels import gaussian_kernel
 import pygsp
+#| export
+import numpy as np
+from sklearn.metrics import pairwise_distances
+
+def median_heuristic(
+        D:np.ndarray, # the distance matrix
+):
+    # estimate kernel bandwidth from distance matrix using the median heuristic
+    # Get upper triangle from distance matrix (ignoring duplicates)
+    h = D[np.triu_indices_from(D)]
+    h = h**2
+    h = np.median(h)
+    nu = np.sqrt(h / 2)
+    return nu
+
+def gaussian_kernel(
+        X:np.ndarray, # pointcloud data as rows, shape n x d
+        kernel_type = "fixed", # either fixed, or adaptive
+        sigma:float = 0, # if fixed, uses kernel bandwidth sigma. If not set, uses a heuristic to estimate a good sigma value
+        k:float = 10, # if adaptive, creates a different kernel bandwidth for each point, based on the distance from that point to the kth nearest neighbor
+        anisotropic_density_normalization:float = 0.5, # if nonzero, performs anisotropic density normalization
+        threshold_for_small_values:float = 1e-5, # Sets all affinities below this value to zero. Set to zero to disable.
+):
+    """Constructs an affinity matrix from pointcloud data, using a gaussian kernel"""
+    supported_kernel_types = {'fixed', 'adaptive'}
+    assert kernel_type in supported_kernel_types
+    D = pairwise_distances(X)
+    if kernel_type == "fixed":
+            if not sigma:
+                # estimate sigma using a heuristic
+                sigma = median_heuristic(D)
+            W = (1/(sigma*np.sqrt(2*np.pi)))*np.exp((-D**2)/(2*sigma**2))
+    elif kernel_type == "adaptive":
+            distance_to_k_neighbor = np.partition(D,k)[:,k]
+            # Populate matrices with this distance for easy division.
+            div1 = np.ones(len(D))[:,None] @ distance_to_k_neighbor[None,:]
+            div2 = distance_to_k_neighbor[:,None] @ np.ones(len(D))[None,:]
+            # print("Distance to kth neighbors",distance_to_k_neighbor)
+            # compute the gaussian kernel with an adaptive bandwidth
+            W = (1/(2*np.sqrt(2*np.pi)))*(np.exp(-D**2/(2*div1**2))/div1 + np.exp(-D**2/(2*div2**2))/div2)
+    if anisotropic_density_normalization:
+        D = np.diag(1/(np.sum(W,axis=1)**anisotropic_density_normalization))
+        W = D @ W @ D
+    if threshold_for_small_values:
+        W[W < threshold_for_small_values] = 0
+    return W
+
 
 def frequency_of_volume_variance(
     model,
@@ -398,3 +445,31 @@ def frequency_of_volume_variance(
     # compute quadric form of laplacian
     quadric_form = log_dets @ G.L @ log_dets.T
     return quadric_form
+
+# %% ../../nbs/library/criteria.ipynb 30
+import torch.nn.functional as F
+import torch
+def curvature_matching_metric(model, dataloader, ground_truth_scalar_curvatures):
+    try:
+        pointcloud = dataloader.dataset.pointcloud
+    except AttributeError:
+        pointcloud = dataloader.dataset.X
+    try:
+        latent_activations = model.encoder(pointcloud).cpu().detach()
+    except AttributeError:
+        latent_activations = model.encode(pointcloud).cpu().detach()
+    
+    # set up manifold
+    pbm = PullbackMetric(2, model.decoder)
+    lcc = LeviCivitaConnection(2, pbm)
+    rm = RiemannianManifold(2, (1, 1), metric=pbm, connection=lcc)
+    # extract scalar curvatures
+    # the GeoAE group's scalar curvature function wasn't giving the right values, so here's my own. TODO: Test and replace their scalar curvature function with mine
+    scalar_curvatures = [rm.k_scalar_curvature(base_point = torch.tensor(latent_activations)[i]) for i in range(len(latent_activations))]
+    # TODO: Modify my scalar curv func to take multiple points
+
+    # compare curvatures
+    scalar_curvatures = torch.nn.functional.normalize(scalar_curvatures, p = 1)
+    ground_truth_scalar_curvatures = torch.nn.functional.normalize(ground_truth_curvatures, p=1)
+    mse = torch.nn.functional.mse_loss(scalar_curvatures, ground_truth_scalar_curvatures)
+    return mse
