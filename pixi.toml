@@ -54,6 +54,8 @@ fastcore = "1.5.29.*"
 # Project Specific
 geomstats = "==2.5.0"
 pygsp = ">=0.5.1,<0.6"
+lightning = ">=2.2.1,<2.3"
+imageio = ">=2.34.0,<2.35"
 
 # [pypi-dependencies]
 # scikit-dimension = "==0.3.*"
