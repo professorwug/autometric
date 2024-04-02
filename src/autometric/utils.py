@@ -538,15 +538,13 @@ def visualize_embedding(
 ):
     if colors is None:
         colors = np.zeros(len(dataloader.dataset))
-    model.eval()
 
-    embeddings = model.encoder(dataloader.dataset.pointcloud).cpu().detach().numpy()
+    embeddings = model.encode(dataloader.dataset.pointcloud).cpu().detach().numpy()
     
-    plt.figure(figsize=(10, 10))
-    plt.scatter(embeddings[:, 0], embeddings[:, 1], c=colors, cmap="viridis")
-    plt.title(title)
-    plt.colorbar()
-    plt.show()
+    fig, axs = plt.subplots(1)
+    axs.scatter(embeddings[:, 0], embeddings[:, 1], c=colors, cmap="viridis")
+    axs.set_title(title)
+    return fig
 
 # %% ../../nbs/library/util.ipynb 4
 def printnum(number):

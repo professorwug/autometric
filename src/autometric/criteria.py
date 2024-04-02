@@ -6,7 +6,7 @@ __all__ = ['determinants_of_encoder_pullback', 'trace_of_encoder_pullback', 'ran
            'smallest_eigenvector', 'normal_vectors_of_encoder_pullback', 'visualize_encoder_pullback_metrics',
            'visualize_encoder_pullback_metrics_in_ambient_space', 'plot_indicatrices',
            'indicatrix_volume_variance_metric', 'median_heuristic', 'gaussian_kernel', 'frequency_of_volume_variance',
-           'curvature_matching_metric']
+           'get_metric_stuffs', 'curvature_matching_metric', 'metric_mse_criterion', 'metric_evec_alignment']
 
 # %% ../../nbs/library/criteria.ipynb 6
 from .metrics import PullbackMetric
@@ -447,40 +447,116 @@ def frequency_of_volume_variance(
     return quadric_form
 
 # %% ../../nbs/library/criteria.ipynb 30
-import torch.nn.functional as F
-import torch
-def curvature_matching_metric(model, dataloader,  ground_truth_scalar_curvatures, pullback_type = "encoder",):
+def get_metric_stuffs(model, dataloader, pullback_type = "encoder"):
     try:
         pointcloud = dataloader.dataset.pointcloud
     except AttributeError:
         pointcloud = dataloader.dataset.X
-    if pullback_type == "encoder":
+    if pullback_type == "decoder":
         try:
-            latent_activations = model.encode(pointcloud).cpu().detach()
+            input_points = model.encode(pointcloud).cpu().detach()
         except AttributeError:
-            latent_activations = model.encode(pointcloud).cpu().detach()
-    elif pullback_type == "decoder":
-        latent_activations = model.decode(pointcloud).cpu().detach()
+            input_points = model.encode(pointcloud).cpu().detach()
+    elif pullback_type == "encoder":
+        input_points = pointcloud
     else:
         raise NotImplementedError("Bad pullback type")
     
     # set up manifold
     if pullback_type == "decoder":
-        pbm = PullbackMetric(2, model.decoder)
+        pbm = PullbackMetric(2, model.decode)
         lcc = LeviCivitaConnection(2, pbm)
         rm = RiemannianManifold(2, (1, 1), metric=pbm, connection=lcc)
+    
     elif pullback_type == "encoder":
-        pbm = PullbackMetric(3, model.encoder)
+        pbm = PullbackMetric(3, model.encode)
+        lcc = LeviCivitaConnection(3, pbm)
+        rm = RiemannianManifold(3, (1, 1), metric=pbm, connection=lcc)
+    return pbm, lcc, rm, input_points, pointcloud
+    
+
+# %% ../../nbs/library/criteria.ipynb 31
+import torch.nn.functional as F
+import torch
+import geomstats
+
+def curvature_matching_metric(model, dataloader,  ground_truth_scalar_curvatures, pullback_type = "encoder",):
+    try:
+        pointcloud = dataloader.dataset.pointcloud
+    except AttributeError:
+        pointcloud = dataloader.dataset.X
+    if pullback_type == "decoder":
+        try:
+            input_points = model.encode(pointcloud).cpu().detach()
+        except AttributeError:
+            input_points = model.encode(pointcloud).cpu().detach()
+    elif pullback_type == "encoder":
+        input_points = pointcloud
+    else:
+        raise NotImplementedError("Bad pullback type")
+    
+    # set up manifold
+    if pullback_type == "decoder":
+        pbm = PullbackMetric(2, model.decode)
+        lcc = LeviCivitaConnection(2, pbm)
+        rm = RiemannianManifold(2, (1, 1), metric=pbm, connection=lcc)
+    
+    elif pullback_type == "encoder":
+        pbm = PullbackMetric(3, model.encode)
         lcc = LeviCivitaConnection(3, pbm)
         rm = RiemannianManifold(3, (1, 1), metric=pbm, connection=lcc)
     
     # extract scalar curvatures
-    # the GeoAE group's scalar curvature function wasn't giving the right values, so here's my own. TODO: Test and replace their scalar curvature function with mine
-    scalar_curvatures = torch.tensor([rm.scalar_curvature(base_point = torch.tensor(latent_activations)[i]).detach().cpu() for i in range(len(latent_activations))])
+    # the GeoAE group's scalar curvature function wasn't giving the right values, so here's my own. 
+    scalar_curvatures = []
+    num_nans = 0
+    for i in trange(len(input_points)):
+        try:
+            sc = rm.scalar_curvature(base_point = torch.tensor(input_points[i])).detach().cpu() 
+        except:
+            sc = 0
+            num_nans += 1
+        scalar_curvatures.append(sc)
+    scalar_curvatures = torch.tensor(scalar_curvatures)
+    print(f"Finished scalar curvature computation with {num_nans} singular points given NaN values.")
+    
+    # torch.tensor([rm.scalar_curvature(base_point = torch.tensor(input_points[i])).detach().cpu() for i in range(len(input_points))])
     # TODO: Modify my scalar curv func to take multiple points
 
     # compare curvatures
     scalar_curvatures = torch.nn.functional.normalize(scalar_curvatures, dim=0, p = 1)
     ground_truth_scalar_curvatures = torch.nn.functional.normalize(ground_truth_scalar_curvatures, dim=0, p=1)
     mse = torch.nn.functional.mse_loss(scalar_curvatures, ground_truth_scalar_curvatures)
-    return mse
+    return mse, scalar_curvatures
+
+# %% ../../nbs/library/criteria.ipynb 33
+def metric_mse_criterion(model, dataloader, manifold, pullback_type = "encoder"):
+    pbm, lcc, rm, input_points, pointcloud = get_metric_stuffs(model, dataloader, pullback_type)
+    computed_metrics = pbm.metric_matrix(input_points)
+    ground_truth_metrics = manifold.metric.metric_matrix(input_points)
+    return torch.nn.functional.mse_loss(computed_metrics, ground_truth_metrics)
+
+# %% ../../nbs/library/criteria.ipynb 34
+def metric_evec_alignment(model, dataloader, manifold, pullback_type="encoder", intrinsic_dimension = 2) -> tuple[float, list]:
+    """
+    Returns 
+    (summed dot products, list of dot products)
+    between largest intrinsic_dim eigenvectors of metrics
+    """
+    pbm, lcc, rm, input_points, pointcloud = get_metric_stuffs(model, dataloader, pullback_type)
+    computed_metrics = pbm.metric_matrix(input_points).detach().numpy()
+    ground_truth_metrics = manifold.metric.metric_matrix(input_points).detach().numpy()
+    dot_prods = []
+    for i in range(len(input_points)):
+        computed_evals, computed_eigenvectors = np.linalg.eig(computed_metrics[i])
+        real_evals, real_eigenvectors = np.linalg.eig(ground_truth_metrics[i])
+        # sort the eigenvectors by eigenvalue
+        computed_eigenvectors = computed_eigenvectors[np.argsort(computed_evals)[::-1]]
+        real_eigenvectors = real_eigenvectors[np.argsort(real_evals)[::-1]]
+        # take the top d eigenvectors and compute dot product
+        dot = 0
+        for dd in range(intrinsic_dimension):
+            dot += np.abs(np.dot(real_eigenvectors[dd], computed_eigenvectors[dd]))/(np.linalg.norm(real_eigenvectors[dd])*np.linalg.norm(computed_eigenvectors[dd]))
+            
+        dot_prods.append(dot)
+    return np.sum(dot_prods), dot_prods
