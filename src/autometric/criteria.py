@@ -14,7 +14,7 @@ import numpy as np
 import torch
 def determinants_of_encoder_pullback(model, dataloader):
     # returns the determinants of the metric matrices for each point in the dataset
-    Metric = PullbackMetric(model.input_dim, model.encoder)
+    Metric = PullbackMetric(model.input_dim, model.encode)
     Gs = Metric.metric_matrix(dataloader.dataset.pointcloud).detach().cpu().numpy()
     dets = [np.linalg.det(G) for G in Gs]
     return np.array(dets)
@@ -25,7 +25,7 @@ import numpy as np
 import torch
 def trace_of_encoder_pullback(model, dataloader):
     # returns the determinants of the metric matrices for each point in the dataset
-    Metric = PullbackMetric(model.input_dim, model.encoder)
+    Metric = PullbackMetric(model.input_dim, model.encode)
     Gs = Metric.metric_matrix(dataloader.dataset.pointcloud).detach().cpu().numpy()
     dets = [np.sum(np.linalg.eigvals(G)) for G in Gs]
     return np.array(dets)
@@ -36,7 +36,7 @@ import numpy as np
 import torch
 def rank_of_encoder_pullback(model, dataloader, eps=1e-10):
     # returns the determinants of the metric matrices for each point in the dataset
-    Metric = PullbackMetric(model.input_dim, model.encoder)
+    Metric = PullbackMetric(model.input_dim, model.encode)
     Gs = Metric.metric_matrix(dataloader.dataset.pointcloud).detach().cpu().numpy()
     ranks = [np.sum((np.linalg.eigvals(G)>eps).astype(int)) for G in Gs]
     return np.array(ranks)
@@ -55,7 +55,7 @@ def spectral_entropy_of_matrix(A):
 
 def spectral_entropy_of_encoder_pullback(model, dataloader):
     # returns the determinants of the metric matrices for each point in the dataset
-    Metric = PullbackMetric(model.input_dim, model.encoder)
+    Metric = PullbackMetric(model.input_dim, model.encode)
     Gs = Metric.metric_matrix(dataloader.dataset.pointcloud).detach().cpu().numpy()
     entropies = [spectral_entropy_of_matrix(G) for G in Gs]
     return np.array(entropies)
@@ -63,7 +63,7 @@ def spectral_entropy_of_encoder_pullback(model, dataloader):
 # %% ../../nbs/library/criteria.ipynb 10
 def evals_of_encoder_pullback(model, dataloader):
     # returns the determinants of the metric matrices for each point in the dataset
-    Metric = PullbackMetric(model.input_dim, model.encoder)
+    Metric = PullbackMetric(model.input_dim, model.encode)
     Gs = Metric.metric_matrix(dataloader.dataset.pointcloud).detach().cpu().numpy()
     e = [np.sort(np.linalg.eigvals(G))[::-1] for G in Gs]
     return np.vstack(e)
@@ -89,7 +89,7 @@ def smallest_eigenvector(matrix):
     return eigenvectors[:, min_index]
 def normal_vectors_of_encoder_pullback(model, dataloader):
     # returns the determinants of the metric matrices for each point in the dataset
-    Metric = PullbackMetric(model.input_dim, model.encoder)
+    Metric = PullbackMetric(model.input_dim, model.encode)
     Gs = Metric.metric_matrix(dataloader.dataset.pointcloud).detach().cpu().numpy()
     e = [smallest_eigenvector(G) for G in Gs]
     return np.vstack(e)
@@ -101,7 +101,7 @@ from .utils import *
 from mpl_toolkits.mplot3d import Axes3D
 
 def visualize_encoder_pullback_metrics(model, dataloader, title):
-    X = model.encoder(dataloader.dataset.pointcloud).cpu().detach().numpy()
+    X = model.encode(dataloader.dataset.pointcloud).cpu().detach().numpy()
     fig, axs = plt.subplots(2, 3, figsize=(12, 8))
 
     spectral_entropy = spectral_entropy_of_encoder_pullback(model,dataloader)
@@ -132,7 +132,7 @@ from .utils import *
 from mpl_toolkits.mplot3d import Axes3D
 
 def visualize_encoder_pullback_metrics_in_ambient_space(model, dataloader, title):
-    X = model.encoder(dataloader.dataset.pointcloud).cpu().detach().numpy()
+    X = model.encode(dataloader.dataset.pointcloud).cpu().detach().numpy()
     D = dataloader.dataset.pointcloud.cpu().detach().numpy()
     figure = plt.figure()
 
@@ -190,7 +190,7 @@ def plot_indicatrices(
     if latent_activations is None:
         pointcloud = dataloader.dataset.pointcloud
         try:
-            latent_activations = model.encoder(dataloader.dataset.pointcloud).cpu().detach()
+            latent_activations = model.encode(dataloader.dataset.pointcloud).cpu().detach()
         except AttributeError:
             latent_activations = model.encode(dataloader.dataset.pointcloud).cpu().detach()
     if labels is None:
@@ -339,7 +339,7 @@ def indicatrix_volume_variance_metric(
     except AttributeError:
         pointcloud = dataloader.dataset.X
     try:
-        latent_activations = model.encoder(pointcloud).cpu().detach()
+        latent_activations = model.encode(pointcloud).cpu().detach()
     except AttributeError:
         latent_activations = model.encode(pointcloud).cpu().detach()
     
@@ -418,7 +418,7 @@ def frequency_of_volume_variance(
     except AttributeError:
         pointcloud = dataloader.dataset.X
     try:
-        latent_activations = model.encoder(pointcloud).cpu().detach()
+        latent_activations = model.encode(pointcloud).cpu().detach()
     except AttributeError:
         latent_activations = model.encode(pointcloud).cpu().detach()
     
@@ -449,27 +449,38 @@ def frequency_of_volume_variance(
 # %% ../../nbs/library/criteria.ipynb 30
 import torch.nn.functional as F
 import torch
-def curvature_matching_metric(model, dataloader, ground_truth_scalar_curvatures):
+def curvature_matching_metric(model, dataloader,  ground_truth_scalar_curvatures, pullback_type = "encoder",):
     try:
         pointcloud = dataloader.dataset.pointcloud
     except AttributeError:
         pointcloud = dataloader.dataset.X
-    try:
-        latent_activations = model.encoder(pointcloud).cpu().detach()
-    except AttributeError:
-        latent_activations = model.encode(pointcloud).cpu().detach()
+    if pullback_type == "encoder":
+        try:
+            latent_activations = model.encode(pointcloud).cpu().detach()
+        except AttributeError:
+            latent_activations = model.encode(pointcloud).cpu().detach()
+    elif pullback_type == "decoder":
+        latent_activations = model.decode(pointcloud).cpu().detach()
+    else:
+        raise NotImplementedError("Bad pullback type")
     
     # set up manifold
-    pbm = PullbackMetric(2, model.decoder)
-    lcc = LeviCivitaConnection(2, pbm)
-    rm = RiemannianManifold(2, (1, 1), metric=pbm, connection=lcc)
+    if pullback_type == "decoder":
+        pbm = PullbackMetric(2, model.decoder)
+        lcc = LeviCivitaConnection(2, pbm)
+        rm = RiemannianManifold(2, (1, 1), metric=pbm, connection=lcc)
+    elif pullback_type == "encoder":
+        pbm = PullbackMetric(3, model.encoder)
+        lcc = LeviCivitaConnection(3, pbm)
+        rm = RiemannianManifold(3, (1, 1), metric=pbm, connection=lcc)
+    
     # extract scalar curvatures
     # the GeoAE group's scalar curvature function wasn't giving the right values, so here's my own. TODO: Test and replace their scalar curvature function with mine
-    scalar_curvatures = [rm.k_scalar_curvature(base_point = torch.tensor(latent_activations)[i]) for i in range(len(latent_activations))]
+    scalar_curvatures = torch.tensor([rm.scalar_curvature(base_point = torch.tensor(latent_activations)[i]).detach().cpu() for i in range(len(latent_activations))])
     # TODO: Modify my scalar curv func to take multiple points
 
     # compare curvatures
-    scalar_curvatures = torch.nn.functional.normalize(scalar_curvatures, p = 1)
-    ground_truth_scalar_curvatures = torch.nn.functional.normalize(ground_truth_curvatures, p=1)
+    scalar_curvatures = torch.nn.functional.normalize(scalar_curvatures, dim=0, p = 1)
+    ground_truth_scalar_curvatures = torch.nn.functional.normalize(ground_truth_scalar_curvatures, dim=0, p=1)
     mse = torch.nn.functional.mse_loss(scalar_curvatures, ground_truth_scalar_curvatures)
     return mse
