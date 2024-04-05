@@ -235,8 +235,8 @@ class Sphere(ToyManifold):
 # %% ../../nbs/library/datasets.ipynb 29
 class Hemisphere(Sphere):
     def __init__(self, num_points = 2000, r = 1):
-        super().__init__(num_points, r)
-        self.X = self.X[self.X[:,2] > 0]
+        super().__init__(num_points, r, threshold=0)
+        self.X = self.X[self.X[:,2] > threshold]
 
 # %% ../../nbs/library/datasets.ipynb 32
 import torch

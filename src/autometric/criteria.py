@@ -6,7 +6,8 @@ __all__ = ['determinants_of_encoder_pullback', 'trace_of_encoder_pullback', 'ran
            'smallest_eigenvector', 'normal_vectors_of_encoder_pullback', 'visualize_encoder_pullback_metrics',
            'visualize_encoder_pullback_metrics_in_ambient_space', 'plot_indicatrices',
            'indicatrix_volume_variance_metric', 'median_heuristic', 'gaussian_kernel', 'frequency_of_volume_variance',
-           'get_metric_stuffs', 'curvature_matching_metric', 'metric_mse_criterion', 'metric_evec_alignment']
+           'get_metric_stuffs', 'curvature_matching_metric', 'metric_mse_criterion', 'metric_evec_alignment',
+           'normal_vector_alignment']
 
 # %% ../../nbs/library/criteria.ipynb 6
 from .metrics import PullbackMetric
@@ -532,8 +533,9 @@ def curvature_matching_metric(model, dataloader,  ground_truth_scalar_curvatures
 # %% ../../nbs/library/criteria.ipynb 33
 def metric_mse_criterion(model, dataloader, manifold, pullback_type = "encoder"):
     pbm, lcc, rm, input_points, pointcloud = get_metric_stuffs(model, dataloader, pullback_type)
+    input_points = manifold.X
     computed_metrics = pbm.metric_matrix(input_points)
-    ground_truth_metrics = manifold.metric.metric_matrix(input_points)
+    ground_truth_metrics = manifold.metric.metric_matrix(manifold.intrinsic_coords)
     return torch.nn.functional.mse_loss(computed_metrics, ground_truth_metrics)
 
 # %% ../../nbs/library/criteria.ipynb 34
@@ -544,8 +546,14 @@ def metric_evec_alignment(model, dataloader, manifold, pullback_type="encoder", 
     between largest intrinsic_dim eigenvectors of metrics
     """
     pbm, lcc, rm, input_points, pointcloud = get_metric_stuffs(model, dataloader, pullback_type)
-    computed_metrics = pbm.metric_matrix(input_points).detach().numpy()
-    ground_truth_metrics = manifold.metric.metric_matrix(input_points).detach().numpy()
+    input_points = torch.tensor(manifold.X).float()
+    if pullback_type == "encoder":
+        computed_metrics = pbm.metric_matrix(input_points).detach().numpy()
+    else:
+        computed_metrics = pbm.metric_matrix(
+            model.encode(input_points)
+        ).detach().numpy()
+    ground_truth_metrics = manifold.metric.metric_matrix(manifold.intrinsic_coords).detach().numpy()
     dot_prods = []
     for i in range(len(input_points)):
         computed_evals, computed_eigenvectors = np.linalg.eig(computed_metrics[i])
@@ -553,6 +561,13 @@ def metric_evec_alignment(model, dataloader, manifold, pullback_type="encoder", 
         # sort the eigenvectors by eigenvalue
         computed_eigenvectors = computed_eigenvectors[np.argsort(computed_evals)[::-1]]
         real_eigenvectors = real_eigenvectors[np.argsort(real_evals)[::-1]]
+        # push eigenvectors into ambient space for comparison
+        real_eigenvectors = manifold.immersion(torch.tensor(real_eigenvectors)).detach().numpy()
+        # if its the encoder pullback, we need to do the same for the model
+        if pullback_type == "decoder":
+            computed_eigenvectors = model.decode(torch.tensor(computed_eigenvectors)).detach().numpy()
+            # computed_eigenvectors = model.encode(torch.tensor(computed_eigenvectors[:intrinsic_dimension])).detach().cpu().numpy()
+        # print(f" computed evecs shape {computed_eigenvectors.shape} real evecs shape {real_eigenvectors.shape}. Real metrics {ground_truth_metrics[0]}")
         # take the top d eigenvectors and compute dot product
         dot = 0
         for dd in range(intrinsic_dimension):
@@ -560,3 +575,43 @@ def metric_evec_alignment(model, dataloader, manifold, pullback_type="encoder", 
             
         dot_prods.append(dot)
     return np.sum(dot_prods), dot_prods
+
+# %% ../../nbs/library/criteria.ipynb 35
+def normal_vector_alignment(model, dataloader, manifold, pullback_type="encoder", intrinsic_dimension = 2) -> tuple[float, list]:
+    """
+    Returns 
+    (summed dot products, list of normal vectors)
+    """
+    pbm, lcc, rm, input_points, pointcloud = get_metric_stuffs(model, dataloader, pullback_type)
+    input_points = torch.tensor(manifold.X).float()
+    if pullback_type == "encoder":
+        computed_metrics = pbm.metric_matrix(input_points).detach().numpy()
+    else:
+        computed_metrics = pbm.metric_matrix(
+            model.encode(input_points)
+        ).detach().numpy()
+    ground_truth_metrics = manifold.metric.metric_matrix(manifold.intrinsic_coords).detach().numpy()
+    dot_prods = []
+    real_normals = []
+    computed_normals = []
+    for i in range(len(input_points)):
+        computed_evals, computed_eigenvectors = np.linalg.eig(computed_metrics[i])
+        real_evals, real_eigenvectors = np.linalg.eig(ground_truth_metrics[i])
+        # sort the eigenvectors by eigenvalue
+        computed_eigenvectors = computed_eigenvectors[np.argsort(computed_evals)[::-1]]
+        real_eigenvectors = real_eigenvectors[np.argsort(real_evals)[::-1]]
+        # push eigenvectors into ambient space for comparison
+        real_eigenvectors = manifold.immersion(torch.tensor(real_eigenvectors)).detach().numpy()
+        # if its the encoder pullback, we need to do the same for the model
+        if pullback_type == "decoder":
+            computed_eigenvectors = model.decode(torch.tensor(computed_eigenvectors)).detach().numpy()
+            # computed_eigenvectors = model.encode(torch.tensor(computed_eigenvectors[:intrinsic_dimension])).detach().cpu().numpy()
+        # print(f" computed evecs shape {computed_eigenvectors.shape} real evecs shape {real_eigenvectors.shape}. Real metrics {ground_truth_metrics[0]}")
+        # take the top d eigenvectors, and find the normal
+        computed_normal = np.cross(computed_eigenvectors[0], computed_eigenvectors[1])
+        real_normal = np.cross(real_eigenvectors[0], real_eigenvectors[1])
+        dot = np.abs(np.dot(computed_normal, real_normal))
+        dot_prods.append(dot)
+        real_normals.append(real_normal)
+        computed_normals.append(computed_normal)
+    return np.sum(dot_prods), real_normals, computed_normals

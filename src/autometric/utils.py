@@ -544,7 +544,7 @@ def visualize_embedding(
     fig, axs = plt.subplots(1)
     axs.scatter(embeddings[:, 0], embeddings[:, 1], c=colors, cmap="viridis")
     axs.set_title(title)
-    return fig
+    return axs
 
 # %% ../../nbs/library/util.ipynb 4
 def printnum(number):
