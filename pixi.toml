@@ -88,4 +88,8 @@ cuda = ["cuda"]
 [pypi-dependencies]
 sympytorch = "*"
 chart-studio = "*"
+jax = "*"
+flax = "*"
+wandb = "*"
+clu = "*"
 # mlx = ["mlx"]
