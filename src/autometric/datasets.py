@@ -94,7 +94,10 @@ class ToyManifold:
         F, # parameterization of manifold, as a sympy matrix of size $N \times 1$
         variable_bounds, 
         num_points = 2000, # num points to sample
+        seed = None,
     ):
+        if seed is not None:
+            np.random.seed(seed)
         self.F = F
         params = sorted(F.free_symbols, key=lambda s: s.name)
         self.param_list = [str(f) for f in params]
@@ -138,6 +141,18 @@ class ToyManifold:
         self.immersion = lambda x : self.pytorch_function(
             **{param: (x[i]*(self.variable_bounds[1] - self.variable_bounds[0]) + self.variable_bounds[0]) for i, param in enumerate(self.param_list)}
             )
+    def decode(self, intrinsic_coords):
+        intrinsic_coords = torch.tensor(intrinsic_coords)
+        if len(intrinsic_coords.size()) == 1:
+            intrinsic_coords = intrinsic_coords[None,:]
+        return vmap(self.immersion)(intrinsic_coords)
+    
+    def encode(self, X):
+        X = torch.tensor(X)
+        if len(X.size()) == 1:
+            X = X[None,:]
+        # Converts X to the intrinsic coords. Assumes that X is generated from self.sample
+        return self.intrinsic_coords[np.argmin(torch.cdist(self.X, X), axis=0)]
         
     def plot(self, labels = None, title=""):
         if labels is None: labels = self.ks
@@ -222,6 +237,9 @@ class Sphere(ToyManifold):
         """
         Returns geodesic in ambient space between points a and b.
         """
+        # if a and b are 2d, convert to 1d
+        a = torch.squeeze(a)
+        b = torch.squeeze(b)
         cross = torch.cross(a, b, dim=-1)
         agreement_with_cross = torch.func.vmap(lambda x: torch.dot(cross, x))(self.X)
         great_circle_points = self.X[torch.abs(agreement_with_cross) < tolerance]
@@ -231,14 +249,22 @@ class Sphere(ToyManifold):
         angle = torch.linalg.norm(torch.cross(a, b, dim=-1))/self.r**2
         length = self.r * angle
         return length, great_circle_points
+    def latent_geodesic(self,
+                        a, b, 
+                        ts = None, # Ignored. For compatibility with other geodesic functions. 
+                        tolerance = 0.02):
+        # if a and b are 1d, convert to 2d
+        a = self.decode(a)
+        b = self.decode(b)
+        return self.encode(self.geodesic(a, b, tolerance = tolerance)[1])
 
-# %% ../../nbs/library/datasets.ipynb 29
+# %% ../../nbs/library/datasets.ipynb 33
 class Hemisphere(Sphere):
     def __init__(self, num_points = 2000, r = 1):
         super().__init__(num_points, r, threshold=0)
         self.X = self.X[self.X[:,2] > threshold]
 
-# %% ../../nbs/library/datasets.ipynb 32
+# %% ../../nbs/library/datasets.ipynb 37
 import torch
 
 class PointcloudDataset(torch.utils.data.Dataset):
@@ -267,13 +293,13 @@ class PointcloudWithDistancesDataset(torch.utils.data.Dataset):
         batch['d'] = self.distances[batch_idxs][:,batch_idxs]
         return batch
 
-# %% ../../nbs/library/datasets.ipynb 33
+# %% ../../nbs/library/datasets.ipynb 38
 def dataloader_from_pointcloud_with_distances(pointcloud, distances, batch_size = 64):
     dataset = PointcloudWithDistancesDataset(pointcloud, distances, batch_size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=None, shuffle=True)
     return dataloader
 
-# %% ../../nbs/library/datasets.ipynb 34
+# %% ../../nbs/library/datasets.ipynb 39
 def train_and_testloader_from_pointcloud_with_distances(
     pointcloud, distances, batch_size = 64, train_test_split = 0.8
 ):
@@ -288,7 +314,7 @@ def train_and_testloader_from_pointcloud_with_distances(
     testloader = dataloader_from_pointcloud_with_distances(X_test, D_test, batch_size)
     return trainloader, testloader
 
-# %% ../../nbs/library/datasets.ipynb 36
+# %% ../../nbs/library/datasets.ipynb 41
 import numpy as np
 import plotly.graph_objects as go
 import chart_studio
@@ -387,7 +413,7 @@ def plot_3d_vector_field(X, *vector_fields, names=None, arrow_length=0.5, upload
         print("Your plot is now live at ",url)
 
 
-# %% ../../nbs/library/datasets.ipynb 37
+# %% ../../nbs/library/datasets.ipynb 42
 def sphere_with_normals(
     n_points
 ):
@@ -395,7 +421,7 @@ def sphere_with_normals(
     N = X
     return X, N
 
-# %% ../../nbs/library/datasets.ipynb 39
+# %% ../../nbs/library/datasets.ipynb 44
 import os
 from fastcore.script import *
 
