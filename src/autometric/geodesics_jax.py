@@ -75,7 +75,7 @@ class GeodesicQuicktrainer(GeodesicTrainer):
             )
     
 
-# %% ../../nbs/library/geodesics.ipynb 43
+# %% ../../nbs/library/geodesics.ipynb 47
 from .utils import plot_3d
 
 def sample_along_geodesic(
@@ -135,4 +135,5 @@ def visualize_geodesics(
     combined_g2s = np.concatenate(geodesics_2, axis=0)
     plot_3d_with_geodesics(X_ambient, [combined_g1s, combined_g2s])
     return geodesics_1, geodesics_2
-    
+
+
