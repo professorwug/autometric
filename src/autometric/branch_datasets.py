@@ -102,7 +102,6 @@ class Stick():
         a, b = 0, self.time_range
         curve_length, _ = scipy.integrate.quad(integrand, a, b)
 
-        print("Curve length:", curve_length)
         return curve_length
 
 # %% ../../nbs/library/branch-datasets.ipynb 7
@@ -168,6 +167,7 @@ class Branch():
             stick_idx = new_stick_idx
         self.branching_nums = np.array(self.branching_nums)
         self.X = self.sample(num_samples)
+        self.X_ground_truth = self.X
 
     def sample(self,n_samples=5000):
         self.num_branches_per_point = []
@@ -205,6 +205,10 @@ class Branch():
         path = nx.shortest_path(self.G, a_stick_idx, b_stick_idx)
         path = list(path)# a list of stick idxs.
         path = [int(p) for p in path]
+        if len(path) == 1:
+            # both points are on the same stick. We approximate the geodesic as the stick. # TODO: restrict stick length to be less than the distance between the two points
+            length = self.sticks[path[0]].length()
+            return self.sticks[path[0]].sample(len(ts)), length
         
         # get distance from a to the closest endpoint of the path - closest to the next stick, that is. 
         # this is the same as the distance from a to the starting point of the next stick.
@@ -215,7 +219,6 @@ class Branch():
             self.sticks[path[-2]].end_point() - b
         )
         intermediate_dists = [self.sticks[p].length() for p in path[1:-1]]
-        print('intermediate_dists', intermediate_dists)
         length = starting_dist + np.sum(intermediate_dists) + ending_dist
         
         # get the points along the path. We'll just sample new points along each of the intermediate sticks. 
@@ -223,27 +226,87 @@ class Branch():
         def num_samples_per_length(partial_length):
             l =  int((partial_length / length) * len(ts))
             if l == 0: l = 1
-            print(partial_length, length, l)
             return l
+        def num_points_so_far(points):
+            return sum([len(p) for p in points])
 
         points = []
         starting_samples = self.sticks[path[0]].sample(num_samples_per_length(starting_dist))
-        print(len(starting_samples))
         # reject points which are further from the next stick than a
         starting_samples = starting_samples[np.linalg.norm(starting_samples - self.sticks[path[1]].start_point(), axis=1) <= starting_dist]
-        # repeat for b
+        points.append(starting_samples)
         ending_samples = self.sticks[path[-1]].sample(num_samples_per_length(ending_dist))
         ending_samples = ending_samples[np.linalg.norm(ending_samples - self.sticks[path[-2]].end_point(), axis=1) < ending_dist]
-        points.append(starting_samples)
         points.append(ending_samples)
 
-        for p, partial_length in zip(path[1:-1], intermediate_dists):
-            # get the points on the stick
-            stick_points = self.sticks[p].sample(num_samples_per_length(partial_length))
+        # if there are more than 2 sticks, here we sample intermediate points
+        if len(path) > 2:
+            for p, partial_length in zip(path[1:-2], intermediate_dists[:-1]):
+                # get the points on the stick
+                n = num_samples_per_length(partial_length)
+                if n < 10: n = 10
+                stick_points = self.sticks[p].sample(n)
+                points.append(stick_points)
+            # for the last intermediate stick, we'll supplement the samples to get the desired length
+            num_samples = num_samples_per_length(intermediate_dists[-1]) + (len(ts) - num_samples_per_length(intermediate_dists[-1]) - num_points_so_far(points))
+            if num_samples < 2: 
+                num_samples = 2
+            stick_points = self.sticks[path[-2]].sample(num_samples)
             points.append(stick_points)
+        else:
+            # to fill in the geodesic to desired length, we'll just repeatedly sample from start and end
+            while num_points_so_far(points) < len(ts):
+                points_left = (len(ts) - num_points_so_far(points)) // 2 + 1
+                starting_samples = self.sticks[path[0]].sample(points_left)
+                starting_samples = starting_samples[np.linalg.norm(starting_samples - self.sticks[path[1]].start_point(), axis=1) <= starting_dist]
+                points.append(starting_samples)
+                ending_samples = self.sticks[path[-1]].sample(points_left)
+                ending_samples = ending_samples[np.linalg.norm(ending_samples - self.sticks[path[-2]].end_point(), axis=1) < ending_dist]
+                points.append(ending_samples)
         
+        # if len(points) exceeds len(ts), randomly subsample
+        if num_points_so_far(points) > len(ts):
+            points = points[:len(ts)]
         g = np.concatenate(points)
+        if len(g) != len(ts):
+            raise ValueError(f"Geodesic length is not equal to number of timesteps, with {len(g)} points and {len(ts)} timesteps and {len(path)} path points")
         return g, length
+    
+    def geodesics(self, start_points, end_points, ts):
+        """
+        Takes start, endpoint pairs in ambient space, and list of times. Returns geodesics and lengths.
+        """
+        # test if start and end points are tensors
+        if isinstance(start_points, np.ndarray):
+            start_points = torch.tensor(start_points)
+        if isinstance(end_points, np.ndarray):
+            end_points = torch.tensor(end_points)
+        if isinstance(ts, np.ndarray):
+            ts = torch.tensor(ts)
+        
+        # test if start and end points are among the previously sampled points
+        # for each point, find the closest point in the sampled points. If it exceeds a threshold of 1e-3, then raise an error.
+        distances_to_sampled_points = torch.cdist(torch.cat([start_points, end_points], dim=0), torch.tensor(self.X))
+        corresponding_idxs = torch.argmin(distances_to_sampled_points, dim=1)
+        
+        for i in range(len(start_points)):
+            # closest_idx = torch.argmin(distances_to_sampled_points[i], dim=0)
+            closest_value = distances_to_sampled_points[i][corresponding_idxs[i]]
+            if closest_value > 1e-3:
+                raise ValueError(f"Start and end points must be among the previously sampled points. Min dist to manifold is {closest_value}")
+            
+        gs = []
+        lengths = []
+        for i in range(len(start_points)):
+            g, l = self.pairwise_geodesic(start_points[i].numpy(), end_points[i].numpy(), ts)
+            gs.append(torch.tensor(g))
+            lengths.append(torch.tensor(l))
+            
+        # make conversion safe
+        lengths = torch.tensor(lengths)
+        gs = [g.cpu().detach() for g in gs]
+        lengths = lengths.cpu().detach()
+        return gs, lengths
         
         
         
