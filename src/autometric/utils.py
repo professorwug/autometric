@@ -4,7 +4,8 @@
 __all__ = ['Color', 'get_sc_kwargs', 'get_saving_kwargs', 'get_coordinates', 'get_hull', 'in_hull', 'batch_jacobian', 'symlog',
            'symlog_inv', 'minmax', 'cmap_labels', 'values_in_quantile', 'determine_scaling_fn', 'transform_axes',
            'rotation_matrix', 'pathpatch_2d_to_3d', 'pathpatch_translate', 'get_significant', 'get_next_digit',
-           'round_significant', 'visualize_embedding', 'printnum', 'plot_3d', 'gif_from_multiarray']
+           'round_significant', 'visualize_embedding', 'printnum', 'plot_3d', 'plot_3d_with_geodesics',
+           'gif_from_multiarray']
 
 # %% ../../nbs/library/util.ipynb 2
 """
@@ -587,7 +588,28 @@ def plot_3d(X,distribution=None, title="",lim=None,use_plotly=False, zlim = None
         if colorbar: fig.colorbar(im, ax=ax)
         plt.show()
 
-# %% ../../nbs/library/util.ipynb 7
+# %% ../../nbs/library/util.ipynb 6
+# from plotly3d.plot import scatter
+def plot_3d_with_geodesics(X, geodesics, ground_truth_geodesics = None, s=5, filename = None):
+    # if geodesics is not a list, wrap it in one
+    if isinstance(geodesics, np.ndarray):
+        geodesics = [geodesics]
+    combined_geodesics = np.concatenate(geodesics, axis=0)
+    all_points = np.concatenate([X, combined_geodesics], axis=0)
+    plot_colors = np.zeros(len(X) + len(combined_geodesics))
+    running_length = len(X)
+    for i, g in enumerate(geodesics):
+        plot_colors[running_length:running_length + len(g)] = i + 1
+        running_length += len(g)
+    if ground_truth_geodesics is not None:
+        ground_truth_geo_points = ground_truth_geodesics.reshape(-1,all_points.shape[1])
+        ground_truth_colors = np.ones(len(ground_truth_geo_points))*(i+2)
+        all_points = np.vstack([all_points, ground_truth_geo_points])
+        plot_colors = np.concatenate([plot_colors, ground_truth_colors])
+    # scatter(all_points, colors = plot_colors,s=s, filename = filename).show()
+    plot_3d(all_points, plot_colors, use_plotly=True)
+
+# %% ../../nbs/library/util.ipynb 8
 from imageio import imread, mimwrite
 from IPython.display import Image
 import os

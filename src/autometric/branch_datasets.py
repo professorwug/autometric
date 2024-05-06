@@ -11,73 +11,114 @@ import itertools
 def random_polynomial(
         vars, # variables to construct polynomial from
         degree = 2, # maximum degree of terms
+        scale = 1, # scale of the polynomial coefficients (sampled from 0 to 1, multiplied by this)
 ):
     num_variables = len(vars)
     terms = []
     for d in range(1, degree + 1):
         for indices in itertools.combinations_with_replacement(range(num_variables), d):
             terms.append(np.prod([vars[i] for i in indices]))
-    coeffs = np.random.normal(size = len(terms))
+    coeffs = np.random.uniform(size = len(terms))*scale
     return sum([coeffs[i] * terms[i] for i in range(len(terms))])
 
 
 # %% ../../nbs/library/branch-datasets.ipynb 4
 from fastcore.all import *
 import sympy as sp
+import scipy.integrate
 
 class Stick():
     def __init__(
         self,
         dimension,
         degree,
-        start_point,
+        starting_point,
         time_range = 1
     ):
         store_attr()
         # construct a unique polynomial for yourself
         x = sp.symbols('x')
+        self.x = x
         p = random_polynomial(
             [x],degree
         )
         self.polynomial = p
         self.polynomial_np = sp.lambdify([x], self.polynomial, "numpy")
+        self.starting_point = starting_point
 
         # random direction for polynomial, scaled to unit length
         self.direction = np.random.randn(self.dimension)
         self.direction /= np.linalg.norm(self.direction)
 
     def sample_at_time(self,t):
-        return self.polynomial_np(self.direction*t) + self.start_point
+        return self.polynomial_np(self.direction*t) + self.start_point()
 
     def end_point(self):
         return self.sample_at_time(self.time_range)
+    def start_point(self):
+        return self.starting_point
 
     def sample(self, n_samples):
         ts = np.random.rand(n_samples)*self.time_range
         Xs = [self.sample_at_time(t) for t in ts]
         return np.array(Xs)
+    
+    # def length(self):
+    #     l = -1
+    #     i = 0
+    #     while l < 0 and i < 100:
+    #         l = self._length()
+    #         print(l, 'at time', i, 'with polynomial', self.polynomial)
+    #         i += 1
+    #     return l
         
+        
+    # def length(self):
+    #     # integrate the polynomial over the time range
+    #     # using sympy
+    #     x = sp.symbols('x')
+    #     # path length integrand
+    #     integrand = sp.sqrt(1 + sp.diff(self.polynomial, x)**2)
+    #     integral = integrand.integrate()
+        
+    #     integral = sp.N(sp.integrate(
+    #         integrand, (x, 0, self.time_range), 
+    #         ))
+    #     integral_fn = sp.lambdify([x], integral, "numpy")
+    #     integrated_length = integral_fn(self.time_range)
+    #     print('integrated length is',integral, 'numpy version is',integrated_length)
+    #     return integrated_length
+    
     def length(self):
-        # integrate the polynomial over the time range
-        # using sympy
-        x = sp.symbols('x')
-        # path length integrand
-        integrand = sp.sqrt(1 + sp.diff(self.polynomial, x)**2)
-        integral = sp.integrate(
-            integrand, (x, 0, self.time_range))
-        return float(integral)
+        # Using these numerical methods is SO much faster than using sympy
+        df_dx = sp.diff(self.polynomial, self.x)
+        f_prime = sp.lambdify(self.x, df_dx, 'numpy')
+
+        # Step 4: Define the function to integrate to find the curve length
+        def integrand(x):
+            return np.sqrt(1 + f_prime(x)**2)
+
+        # Step 5: Calculate the curve length over a specified interval, e.g., from x = 0 to x = 1
+        a, b = 0, self.time_range
+        curve_length, _ = scipy.integrate.quad(integrand, a, b)
+
+        print("Curve length:", curve_length)
+        return curve_length
 
 # %% ../../nbs/library/branch-datasets.ipynb 7
 import random
 import numpy as np
 import torch
+import networkx as nx
+
 class Branch():
     def __init__(
         self,
         dimension,
-        polynomial_degree=4,
-        max_branches=5,
+        polynomial_degree=2,
+        max_branches=3,
         path_length = 5,
+        num_samples = 2000,
         seed = None,
     ):
         store_attr()
@@ -93,9 +134,13 @@ class Branch():
                 np.zeros(dimension)
             )
         ]
-        self.branching_nums = [np.random.randint(1,max_branches)]
-        self.num_branches_per_point = []
-        self.branch_lengths = []
+        self.branching_nums = [np.random.randint(2,max_branches)]
+        
+        
+        # create a networkx graph
+        self.G = nx.Graph()
+        # add the first stick
+        self.G.add_node(0)
 
         stick_idx = 0
         for i in range(path_length):
@@ -112,12 +157,23 @@ class Branch():
                     )
                     self.sticks.append(stick)
                     self.branching_nums.append(
-                        np.random.randint(1,max_branches)
+                        np.random.randint(2,max_branches)
                     )
+                    # add a node to the graph
+                    self.G.add_node(len(self.sticks)-1)
+                    # add an edge between the idx of the previous stick and the idx of the new stick
+                    # j is the previous stick, since this is the end point; len(self.sticks)-1 is the new stick since it's the last stick
+                    self.G.add_edge(j, len(self.sticks)-1)
+                    
             stick_idx = new_stick_idx
         self.branching_nums = np.array(self.branching_nums)
+        self.X = self.sample(num_samples)
 
     def sample(self,n_samples=5000):
+        self.num_branches_per_point = []
+        self.branch_lengths = []
+        self.samples_to_sticks = []
+        
         Xs = []
         samples_per_stick = n_samples // len(self.sticks)
         for i, stick in enumerate(self.sticks):
@@ -126,6 +182,68 @@ class Branch():
             self.branch_lengths.append(
                 np.ones(samples_per_stick)*stick.length()
             )
+            self.samples_to_sticks.append(np.ones(samples_per_stick)*i)
         self.num_branches_per_point = np.concatenate(self.num_branches_per_point)
         self.branch_lengths = np.concatenate(self.branch_lengths)
+        self.samples_to_sticks = np.concatenate(self.samples_to_sticks)
         return np.concatenate(Xs,axis=0)
+    
+    def pairwise_geodesic(self, a:np.ndarray, b:np.ndarray, ts):
+        # check that both a and b are in self.X
+        # find the distance between each point in self.X and a and then b
+        dists_to_a = np.linalg.norm(self.X - a, axis=1)
+        dist, idx_a = np.min(dists_to_a, axis=0), np.argmin(dists_to_a, axis=0)
+        assert dist < 1e-3, f"Not sampled point. Distance between {a} and {self.X[idx_a]} is {dist}"
+        dists_to_b = np.linalg.norm(self.X - b, axis=1)
+        dist, idx_b = np.min(dists_to_b, axis=0), np.argmin(dists_to_b, axis=0)
+        assert dist < 1e-3, f"Not sampled point. Distance between {b} and {self.X[-dx_b]} is {dist}"
+        
+        a_stick_idx = self.samples_to_sticks[idx_a]
+        b_stick_idx = self.samples_to_sticks[idx_b]
+        
+        # get a djikstra path from a_stick_idx to b_stick_idx with self.G
+        path = nx.shortest_path(self.G, a_stick_idx, b_stick_idx)
+        path = list(path)# a list of stick idxs.
+        path = [int(p) for p in path]
+        
+        # get distance from a to the closest endpoint of the path - closest to the next stick, that is. 
+        # this is the same as the distance from a to the starting point of the next stick.
+        starting_dist = np.linalg.norm(
+            self.sticks[path[1]].start_point() - a
+        )
+        ending_dist = np.linalg.norm(
+            self.sticks[path[-2]].end_point() - b
+        )
+        intermediate_dists = [self.sticks[p].length() for p in path[1:-1]]
+        print('intermediate_dists', intermediate_dists)
+        length = starting_dist + np.sum(intermediate_dists) + ending_dist
+        
+        # get the points along the path. We'll just sample new points along each of the intermediate sticks. 
+        # For the starting and ending stick, we'll sample points and reject those which are further from the nearest stick than a and b respectively.
+        def num_samples_per_length(partial_length):
+            l =  int((partial_length / length) * len(ts))
+            if l == 0: l = 1
+            print(partial_length, length, l)
+            return l
+
+        points = []
+        starting_samples = self.sticks[path[0]].sample(num_samples_per_length(starting_dist))
+        print(len(starting_samples))
+        # reject points which are further from the next stick than a
+        starting_samples = starting_samples[np.linalg.norm(starting_samples - self.sticks[path[1]].start_point(), axis=1) <= starting_dist]
+        # repeat for b
+        ending_samples = self.sticks[path[-1]].sample(num_samples_per_length(ending_dist))
+        ending_samples = ending_samples[np.linalg.norm(ending_samples - self.sticks[path[-2]].end_point(), axis=1) < ending_dist]
+        points.append(starting_samples)
+        points.append(ending_samples)
+
+        for p, partial_length in zip(path[1:-1], intermediate_dists):
+            # get the points on the stick
+            stick_points = self.sticks[p].sample(num_samples_per_length(partial_length))
+            points.append(stick_points)
+        
+        g = np.concatenate(points)
+        return g, length
+        
+        
+        

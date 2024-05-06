@@ -78,7 +78,7 @@ def rejection_sample_from_surface(
     else: 
         return np.squeeze(np.array(points))
 
-# %% ../../nbs/library/datasets.ipynb 6
+# %% ../../nbs/library/datasets.ipynb 7
 from .metrics import PullbackMetric
 from .connections import LeviCivitaConnection
 from .manifolds import RiemannianManifold
@@ -141,18 +141,17 @@ class ToyManifold:
         self.immersion = lambda x : self.pytorch_function(
             **{param: (x[i]*(self.variable_bounds[1] - self.variable_bounds[0]) + self.variable_bounds[0]) for i, param in enumerate(self.param_list)}
             )
-    def decode(self, intrinsic_coords):
+    def decode(self, intrinsic_coords:torch.Tensor):
         intrinsic_coords = torch.tensor(intrinsic_coords)
         if len(intrinsic_coords.size()) == 1:
             intrinsic_coords = intrinsic_coords[None,:]
         return vmap(self.immersion)(intrinsic_coords)
     
-    def encode(self, X):
-        X = torch.tensor(X)
+    def encode(self, X:torch.Tensor):
         if len(X.size()) == 1:
             X = X[None,:]
         # Converts X to the intrinsic coords. Assumes that X is generated from self.sample
-        return self.intrinsic_coords[np.argmin(torch.cdist(self.X, X), axis=0)]
+        return self.intrinsic_coords[torch.argmin(torch.cdist(self.X, X), axis=0)]
         
     def plot(self, labels = None, title=""):
         if labels is None: labels = self.ks
@@ -161,8 +160,41 @@ class ToyManifold:
             self.ks.detach().numpy(),
             title = title
         )
+        
+    def geodesics(self, start_points, end_points, ts):
+        """
+        Takes start, endpoint pairs in ambient space, and list of times. Returns geodesics and lengths.
+        """
+        # test if start and end points are tensors
+        if isinstance(start_points, np.ndarray):
+            start_points = torch.tensor(start_points)
+        if isinstance(end_points, np.ndarray):
+            end_points = torch.tensor(end_points)
+        if isinstance(ts, np.ndarray):
+            ts = torch.tensor(ts)
+        
+        # test if start and end points are among the previously sampled points
+        # for each point, find the closest point in the sampled points. If it exceeds a threshold of 1e-3, then raise an error.
+        distances_to_sampled_points = torch.cdist(self.X, torch.cat([start_points, end_points], dim=0))
+        for i in range(len(start_points)):
+            if torch.min(distances_to_sampled_points[i]) > 1e-3:
+                raise ValueError("Start and end points must be among the previously sampled points.")
+            
+        gs = []
+        lengths = []
+        for i in range(len(start_points)):
+            g, l = self.pairwise_geodesic(start_points[i], end_points[i], ts)
+            gs.append(g)
+            lengths.append(l)
+            
+        # make conversion safe
+        gs = torch.vstack(gs)
+        lengths = torch.tensor(lengths)
+        gs = gs.cpu().detach()
+        lengths = lengths.cpu().detach()
+        return gs, lengths
 
-# %% ../../nbs/library/datasets.ipynb 8
+# %% ../../nbs/library/datasets.ipynb 9
 class Torus(ToyManifold):
     def __init__(self,num_points = 2000, R=2.0, r=1.0):
         self.R, self.r = (R,r)
@@ -175,7 +207,7 @@ class Torus(ToyManifold):
         theta = np.arcsin(X[:,2] / self.r)
         return 1/2*8*np.cos(theta)/(5 + np.cos(theta))
 
-# %% ../../nbs/library/datasets.ipynb 15
+# %% ../../nbs/library/datasets.ipynb 16
 class Saddle(ToyManifold):
     def __init__(self, num_points = 2000, a=1, b = 1):
         # d = intrinsic_dim
@@ -207,7 +239,7 @@ class Saddle(ToyManifold):
             return torch.squeeze(vmap(pointwise_immersion)(tensor_input))
     
 
-# %% ../../nbs/library/datasets.ipynb 20
+# %% ../../nbs/library/datasets.ipynb 21
 class Ellipsoid(ToyManifold):
     def __init__(self, num_points = 2000, a=3, b=2, c=1):
         theta = sym.Symbol("theta")
@@ -218,7 +250,7 @@ class Ellipsoid(ToyManifold):
         super().__init__(F, [0.0,2*np.pi], num_points = num_points)
         self.compute_metrics()
 
-# %% ../../nbs/library/datasets.ipynb 26
+# %% ../../nbs/library/datasets.ipynb 27
 class Sphere(ToyManifold):
     def __init__(self, num_points = 2000, r = 1):
         self.r = r
@@ -229,9 +261,10 @@ class Sphere(ToyManifold):
         )
         super().__init__(F, [0.0,2*np.pi], num_points = num_points)
         self.compute_metrics()
-    def geodesic(self, 
+    def pairwise_geodesic(self, 
                  a, # Coordinates in ambient space
                  b, 
+                 ts = None, # length of this is the number of times to sample along the geodesic
                  tolerance = 0.02
                  ):
         """
@@ -240,15 +273,27 @@ class Sphere(ToyManifold):
         # if a and b are 2d, convert to 1d
         a = torch.squeeze(a)
         b = torch.squeeze(b)
-        cross = torch.cross(a, b, dim=-1)
-        agreement_with_cross = torch.func.vmap(lambda x: torch.dot(cross, x))(self.X)
-        great_circle_points = self.X[torch.abs(agreement_with_cross) < tolerance]
-        # restrict to points on the right side
-        agreement_with_sign = torch.func.vmap(lambda x: torch.dot(a + b, x))(great_circle_points)
-        great_circle_points = great_circle_points[agreement_with_sign > 0]
+        # get a linspace line between the two points
+        if ts is None:
+            ts = torch.linspace(0,1,20)
+        g = torch.zeros(len(ts), 3)
+        g[:,0] = torch.linspace(a[0], b[0], len(ts))
+        g[:,1] = torch.linspace(a[1], b[1], len(ts))
+        g[:,2] = torch.linspace(a[2], b[2], len(ts))
+        # normalize each row in g to have unit length
+        g = g / torch.linalg.norm(g, dim=1, keepdim=True)
+        
+        # compute length of geodesic
         angle = torch.linalg.norm(torch.cross(a, b, dim=-1))/self.r**2
         length = self.r * angle
-        return length, great_circle_points
+        
+        # cross = torch.cross(a, b, dim=-1)
+        # agreement_with_cross = torch.func.vmap(lambda x: torch.dot(cross, x))(self.X)
+        # great_circle_points = self.X[torch.abs(agreement_with_cross) < tolerance]
+        # # restrict to points on the right side
+        # agreement_with_sign = torch.func.vmap(lambda x: torch.dot(a + b, x))(great_circle_points)
+        # great_circle_points = great_circle_points[agreement_with_sign > 0]
+        return g, length
     def latent_geodesic(self,
                         a, b, 
                         ts = None, # Ignored. For compatibility with other geodesic functions. 
@@ -258,13 +303,13 @@ class Sphere(ToyManifold):
         b = self.decode(b)
         return self.encode(self.geodesic(a, b, tolerance = tolerance)[1])
 
-# %% ../../nbs/library/datasets.ipynb 33
+# %% ../../nbs/library/datasets.ipynb 32
 class Hemisphere(Sphere):
-    def __init__(self, num_points = 2000, r = 1):
-        super().__init__(num_points, r, threshold=0)
+    def __init__(self, num_points = 2000, r = 1, threshold=0):
+        super().__init__(num_points, r)
         self.X = self.X[self.X[:,2] > threshold]
 
-# %% ../../nbs/library/datasets.ipynb 37
+# %% ../../nbs/library/datasets.ipynb 44
 import torch
 
 class PointcloudDataset(torch.utils.data.Dataset):
@@ -293,13 +338,13 @@ class PointcloudWithDistancesDataset(torch.utils.data.Dataset):
         batch['d'] = self.distances[batch_idxs][:,batch_idxs]
         return batch
 
-# %% ../../nbs/library/datasets.ipynb 38
+# %% ../../nbs/library/datasets.ipynb 45
 def dataloader_from_pointcloud_with_distances(pointcloud, distances, batch_size = 64):
     dataset = PointcloudWithDistancesDataset(pointcloud, distances, batch_size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=None, shuffle=True)
     return dataloader
 
-# %% ../../nbs/library/datasets.ipynb 39
+# %% ../../nbs/library/datasets.ipynb 46
 def train_and_testloader_from_pointcloud_with_distances(
     pointcloud, distances, batch_size = 64, train_test_split = 0.8
 ):
@@ -314,7 +359,7 @@ def train_and_testloader_from_pointcloud_with_distances(
     testloader = dataloader_from_pointcloud_with_distances(X_test, D_test, batch_size)
     return trainloader, testloader
 
-# %% ../../nbs/library/datasets.ipynb 41
+# %% ../../nbs/library/datasets.ipynb 48
 import numpy as np
 import plotly.graph_objects as go
 import chart_studio
@@ -413,7 +458,7 @@ def plot_3d_vector_field(X, *vector_fields, names=None, arrow_length=0.5, upload
         print("Your plot is now live at ",url)
 
 
-# %% ../../nbs/library/datasets.ipynb 42
+# %% ../../nbs/library/datasets.ipynb 49
 def sphere_with_normals(
     n_points
 ):
@@ -421,7 +466,7 @@ def sphere_with_normals(
     N = X
     return X, N
 
-# %% ../../nbs/library/datasets.ipynb 44
+# %% ../../nbs/library/datasets.ipynb 51
 import os
 from fastcore.script import *
 
