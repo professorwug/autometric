@@ -265,9 +265,9 @@ class Branch():
                 points.append(ending_samples)
         
         # if len(points) exceeds len(ts), randomly subsample
-        if num_points_so_far(points) > len(ts):
-            points = points[:len(ts)]
         g = np.concatenate(points)
+        if len(g) > len(ts):
+            g = g[:len(ts)]
         if len(g) != len(ts):
             raise ValueError(f"Geodesic length is not equal to number of timesteps, with {len(g)} points and {len(ts)} timesteps and {len(path)} path points")
         return g, length

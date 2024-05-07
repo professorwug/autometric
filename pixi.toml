@@ -92,4 +92,5 @@ jax = "*"
 flax = "*"
 wandb = "*"
 clu = "*"
+joblib = "*"
 # mlx = ["mlx"]
