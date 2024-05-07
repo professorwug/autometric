@@ -713,10 +713,11 @@ def export_datasets(
         if isinstance(gs[0], torch.Tensor):
             gs = [g.detach().numpy() for g in gs]
             ls = ls.numpy()
+            
         
         max_len = max([len(g) for g in gs])
         # pad the ends of the list with copies of the last element to make them all the same length, using np.vstack
-        gs = [np.vstack([g, np.repeat(g[-1], max_len - len(g), axis = 0)]) for g in gs]
+        gs = [np.vstack([g[:-1], np.repeat(g[-1][None,:], max_len - len(g) + 1, axis = 0)]) for g in gs]
 
         np.savez(
             os.path.join(foldername, f'{dname}.npz'), 
