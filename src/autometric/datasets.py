@@ -148,6 +148,8 @@ import warnings
 from torch.func import vmap
 import torch
 from copy import deepcopy
+import networkx as nx
+from sklearn.neighbors import NearestNeighbors
 
 class ToyManifold:
     def __init__(
@@ -230,6 +232,45 @@ class ToyManifold:
             title = title
         )
         
+    def pairwise_geodesic_via_djikstra(self, a, b, 
+                                       ts, # ignored. For compatibility with other geodesic functions.
+                                       k = 5):
+        # Builds a nearest neighbor graph out of self.X_ground_truth. Then uses the djikstra algorithm to find the shortest path between a and b.
+        # Assumes and and b are in the ground truth data.
+        
+        # get the indices of the closest points in X_ground_truth
+        a_idx = int(torch.argmin(torch.linalg.norm(self.X_ground_truth - a, dim=1), dim=0))
+        b_idx = int(torch.argmin(torch.linalg.norm(self.X_ground_truth - b, dim=1), dim=0))
+        
+        # For better results, we sample a whole bunch of points and add them to X_ground_truth
+        X_extra_samples, _ = self.sample(50000)
+        X_extra_samples = torch.tensor(X_extra_samples, dtype=torch.float64)
+        X_combined = torch.cat([self.X_ground_truth, X_extra_samples], dim=0)
+        
+        # get k-nn
+        nbrs = NearestNeighbors(n_neighbors=k+1, algorithm='auto').fit(X_combined)
+        distances, indices = nbrs.kneighbors(X_combined)
+        
+        G = nx.Graph()
+        # add nodes to G
+        for i in range(len(X_combined)):
+            G.add_node(i)
+        # Add edges between each point and its k-nearest neighbors
+        for i in range(len(X_combined)):
+            for j in range(1, k+1):  # start from 1 to avoid self-loop (i.e., point itself)
+                G.add_edge(i, indices[i][j], weight = torch.linalg.norm(X_combined[i] - X_combined[indices[i][j]]))
+                G.add_edge(indices[i][j], i, weight = torch.linalg.norm(X_combined[i] - X_combined[indices[i][j]]))
+        
+        
+        self.G = G
+        # find the shortest path between a and b
+        path = nx.shortest_path(G, a_idx, b_idx, weight = "weight")
+        length = nx.shortest_path_length(G, a_idx, b_idx, weight = "weight")
+        
+        g = X_combined[path]
+        return g, length
+        
+        
     def geodesics(self, start_points, end_points, ts):
         """
         Takes start, endpoint pairs in ambient space, and list of times. Returns geodesics and lengths.
@@ -260,7 +301,10 @@ class ToyManifold:
         gs = []
         lengths = []
         for i in range(len(start_points)):
-            g, l = self.pairwise_geodesic(start_points[i], end_points[i], ts)
+            if hasattr(self, "pairwise_geodesic"): # an analytic geodesic is available
+                g, l = self.pairwise_geodesic(start_points[i], end_points[i], ts)
+            else: # use the djikstra algorithm
+                g, l = self.pairwise_geodesic_via_djikstra(start_points[i], end_points[i], ts)
             # convert g to double
             g = g.double()
             if self.rotation_matrix is not None:
@@ -273,6 +317,8 @@ class ToyManifold:
         gs = [g.cpu().detach() for g in gs]
         lengths = lengths.cpu().detach()
         return gs, lengths
+    
+    
 
 # %% ../../nbs/library/datasets.ipynb 10
 class Torus(ToyManifold):
@@ -287,7 +333,7 @@ class Torus(ToyManifold):
         theta = np.arcsin(X[:,2] / self.r)
         return 1/2*8*np.cos(theta)/(5 + np.cos(theta))
 
-# %% ../../nbs/library/datasets.ipynb 17
+# %% ../../nbs/library/datasets.ipynb 22
 class Saddle(ToyManifold):
     def __init__(self, num_points = 2000, a=1, b = 1, rotation_dimension:int = None, noise:float = 0, seed = None):
         # d = intrinsic_dim
@@ -319,7 +365,7 @@ class Saddle(ToyManifold):
             return torch.squeeze(vmap(pointwise_immersion)(tensor_input))
     
 
-# %% ../../nbs/library/datasets.ipynb 22
+# %% ../../nbs/library/datasets.ipynb 32
 class Ellipsoid(ToyManifold):
     def __init__(self, num_points = 2000, a=3, b=2, c=1, rotation_dimension:int = None, noise:float = 0, seed = None):
         theta = sym.Symbol("theta")
@@ -330,7 +376,7 @@ class Ellipsoid(ToyManifold):
         super().__init__(F, [0.0,2*np.pi], num_points = num_points, rotation_dimension = rotation_dimension, noise = noise, seed = seed)
         self.compute_metrics()
 
-# %% ../../nbs/library/datasets.ipynb 28
+# %% ../../nbs/library/datasets.ipynb 39
 class Sphere(ToyManifold):
     def __init__(self, num_points = 2000, r = 1, rotation_dimension:int = None, noise:float = 0, seed = None):
         self.r = r
@@ -383,7 +429,7 @@ class Sphere(ToyManifold):
         b = self.decode(b)
         return self.encode(self.geodesic(a, b, tolerance = tolerance)[1])
 
-# %% ../../nbs/library/datasets.ipynb 33
+# %% ../../nbs/library/datasets.ipynb 44
 class Hemisphere(Sphere):
     def __init__(self, num_points = 2000, r = 1, threshold=0, rotation_dimension:int = None, noise:float = 0, seed = None):
         super().__init__(num_points, r, rotation_dimension=rotation_dimension, noise=noise, seed = seed)
@@ -391,7 +437,7 @@ class Hemisphere(Sphere):
         self.X = self.X[hemisphere_mask]
         self.X_ground_truth = self.X_ground_truth[hemisphere_mask]
 
-# %% ../../nbs/library/datasets.ipynb 37
+# %% ../../nbs/library/datasets.ipynb 48
 class SwissRoll(ToyManifold):
     def __init__(self, num_points = 2000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension:int = None, noise:float = 0, seed = None):
         self.r = r
@@ -436,7 +482,7 @@ class SwissRoll(ToyManifold):
         length = torch.linalg.norm(a - b)
         return g, length
 
-# %% ../../nbs/library/datasets.ipynb 48
+# %% ../../nbs/library/datasets.ipynb 59
 import torch
 
 class PointcloudDataset(torch.utils.data.Dataset):
@@ -465,13 +511,13 @@ class PointcloudWithDistancesDataset(torch.utils.data.Dataset):
         batch['d'] = self.distances[batch_idxs][:,batch_idxs]
         return batch
 
-# %% ../../nbs/library/datasets.ipynb 49
+# %% ../../nbs/library/datasets.ipynb 60
 def dataloader_from_pointcloud_with_distances(pointcloud, distances, batch_size = 64):
     dataset = PointcloudWithDistancesDataset(pointcloud, distances, batch_size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=None, shuffle=True)
     return dataloader
 
-# %% ../../nbs/library/datasets.ipynb 50
+# %% ../../nbs/library/datasets.ipynb 61
 def train_and_testloader_from_pointcloud_with_distances(
     pointcloud, distances, batch_size = 64, train_test_split = 0.8
 ):
@@ -486,7 +532,7 @@ def train_and_testloader_from_pointcloud_with_distances(
     testloader = dataloader_from_pointcloud_with_distances(X_test, D_test, batch_size)
     return trainloader, testloader
 
-# %% ../../nbs/library/datasets.ipynb 52
+# %% ../../nbs/library/datasets.ipynb 63
 import numpy as np
 import plotly.graph_objects as go
 import chart_studio
@@ -585,7 +631,7 @@ def plot_3d_vector_field(X, *vector_fields, names=None, arrow_length=0.5, upload
         print("Your plot is now live at ",url)
 
 
-# %% ../../nbs/library/datasets.ipynb 53
+# %% ../../nbs/library/datasets.ipynb 64
 def sphere_with_normals(
     n_points
 ):
@@ -593,7 +639,7 @@ def sphere_with_normals(
     N = X
     return X, N
 
-# %% ../../nbs/library/datasets.ipynb 55
+# %% ../../nbs/library/datasets.ipynb 66
 import os
 from fastcore.script import *
 from .branch_datasets import Branch
@@ -625,6 +671,18 @@ def export_datasets(
         'Nice Branch' : Branch(dimension = 3, num_samples = 3000, path_length = 3, max_branches = 3, seed = seed),
         'Neutral Branch' : Branch(dimension = 5, num_samples = 3000, path_length = 4, max_branches = 4, seed = seed),
         'Evil Branch' : Branch(dimension = 15, num_samples = 3000, path_length = 5, max_branches = 5, seed = seed),
+        
+        'Nice Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=None, noise=0, seed = seed),
+        'Neutral Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=5, noise=0.1, seed = seed),
+        'Evil Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=15, noise=0.3, seed = seed),
+        
+        'Nice Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=None, noise=0, seed = seed),
+        'Neutral Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=5, noise=0.1, seed = seed),
+        'Evil Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=15, noise=0.3, seed = seed),
+        
+        'Nice Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=None, noise=0, seed = seed),
+        'Neutral Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=5, noise=0.1, seed = seed),
+        'Evil Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=15, noise=0.3, seed = seed),
     }
     for dname, dset in zip(dsets.keys(), dsets.values()):
         print(f"Creating {dname}")
