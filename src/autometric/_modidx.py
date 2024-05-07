@@ -31,10 +31,13 @@ d = { 'settings': { 'branch': 'main',
                                                                                    'autometric/branch_datasets.py'),
                                             'autometric.branch_datasets.Branch.__init__': ( 'library/branch-datasets.html#__init__',
                                                                                             'autometric/branch_datasets.py'),
+<<<<<<< HEAD
                                             'autometric.branch_datasets.Branch.geodesics': ( 'library/branch-datasets.html#geodesics',
                                                                                              'autometric/branch_datasets.py'),
                                             'autometric.branch_datasets.Branch.pairwise_geodesic': ( 'library/branch-datasets.html#pairwise_geodesic',
                                                                                                      'autometric/branch_datasets.py'),
+=======
+>>>>>>> 87c28a8 (updates to off manifold pullback)
                                             'autometric.branch_datasets.Branch.sample': ( 'library/branch-datasets.html#sample',
                                                                                           'autometric/branch_datasets.py'),
                                             'autometric.branch_datasets.Stick': ( 'library/branch-datasets.html#stick',
@@ -127,6 +130,10 @@ d = { 'settings': { 'branch': 'main',
                                      'autometric.datasets.Saddle.immersion': ('library/datasets.html#immersion', 'autometric/datasets.py'),
                                      'autometric.datasets.Sphere': ('library/datasets.html#sphere', 'autometric/datasets.py'),
                                      'autometric.datasets.Sphere.__init__': ('library/datasets.html#__init__', 'autometric/datasets.py'),
+<<<<<<< HEAD
+=======
+                                     'autometric.datasets.Sphere.geodesic': ('library/datasets.html#geodesic', 'autometric/datasets.py'),
+>>>>>>> 87c28a8 (updates to off manifold pullback)
                                      'autometric.datasets.Sphere.latent_geodesic': ( 'library/datasets.html#latent_geodesic',
                                                                                      'autometric/datasets.py'),
                                      'autometric.datasets.Sphere.pairwise_geodesic': ( 'library/datasets.html#pairwise_geodesic',
@@ -150,8 +157,11 @@ d = { 'settings': { 'branch': 'main',
                                                                                           'autometric/datasets.py'),
                                      'autometric.datasets.ToyManifold.decode': ('library/datasets.html#decode', 'autometric/datasets.py'),
                                      'autometric.datasets.ToyManifold.encode': ('library/datasets.html#encode', 'autometric/datasets.py'),
+<<<<<<< HEAD
                                      'autometric.datasets.ToyManifold.geodesics': ( 'library/datasets.html#geodesics',
                                                                                     'autometric/datasets.py'),
+=======
+>>>>>>> 87c28a8 (updates to off manifold pullback)
                                      'autometric.datasets.ToyManifold.plot': ('library/datasets.html#plot', 'autometric/datasets.py'),
                                      'autometric.datasets.ToyManifold.sample': ('library/datasets.html#sample', 'autometric/datasets.py'),
                                      'autometric.datasets.dataloader_from_pointcloud_with_distances': ( 'library/datasets.html#dataloader_from_pointcloud_with_distances',
@@ -188,15 +198,27 @@ d = { 'settings': { 'branch': 'main',
                                                                                                                                                 'autometric/experiments/pullback_comparison.py')},
             'autometric.geodesics_jax': { 'autometric.geodesics_jax.DummyOracle': ( 'library/jax-geodesics.html#dummyoracle',
                                                                                     'autometric/geodesics_jax.py'),
+<<<<<<< HEAD
                                           'autometric.geodesics_jax.DummyOracle.__init__': ( 'library/jax-geodesics.html#__init__',
                                                                                              'autometric/geodesics_jax.py'),
                                           'autometric.geodesics_jax.DummyOracle.geo_length': ( 'library/jax-geodesics.html#geo_length',
                                                                                                'autometric/geodesics_jax.py'),
                                           'autometric.geodesics_jax.DummyOracle.mse_geodesic': ( 'library/jax-geodesics.html#mse_geodesic',
+=======
+                                          'autometric.geodesics_jax.DummyOracle.__init__': ( 'library/geodesics.html#__init__',
+                                                                                             'autometric/geodesics_jax.py'),
+                                          'autometric.geodesics_jax.DummyOracle.geo_length': ( 'library/geodesics.html#geo_length',
+                                                                                               'autometric/geodesics_jax.py'),
+                                          'autometric.geodesics_jax.DummyOracle.mse_geodesic': ( 'library/geodesics.html#mse_geodesic',
+>>>>>>> 87c28a8 (updates to off manifold pullback)
                                                                                                  'autometric/geodesics_jax.py'),
                                           'autometric.geodesics_jax.GeodesicQuicktrainer': ( 'library/jax-geodesics.html#geodesicquicktrainer',
                                                                                              'autometric/geodesics_jax.py'),
+<<<<<<< HEAD
                                           'autometric.geodesics_jax.GeodesicQuicktrainer.__init__': ( 'library/jax-geodesics.html#__init__',
+=======
+                                          'autometric.geodesics_jax.GeodesicQuicktrainer.__init__': ( 'library/geodesics.html#__init__',
+>>>>>>> 87c28a8 (updates to off manifold pullback)
                                                                                                       'autometric/geodesics_jax.py'),
                                           'autometric.geodesics_jax.plot_3d_with_geodesics': ( 'library/jax-geodesics.html#plot_3d_with_geodesics',
                                                                                                'autometric/geodesics_jax.py'),

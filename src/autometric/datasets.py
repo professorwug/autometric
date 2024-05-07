@@ -168,8 +168,13 @@ class ToyManifold:
         self.variable_bounds = variable_bounds
         self.rotation_matrix = None
         self.X, self.intrinsic_coords = self.sample(num_points)
+<<<<<<< HEAD
         self.X = torch.tensor(self.X, dtype=torch.float64)
         self.intrinsic_coords = torch.tensor(self.intrinsic_coords, dtype=torch.float64)
+=======
+        self.X = torch.tensor(self.X, dtype=torch.float32)
+        self.intrinsic_coords = torch.tensor(self.intrinsic_coords)
+>>>>>>> 87c28a8 (updates to off manifold pullback)
         # scale intrinsic coords back to 0,1
         self.intrinsic_coords = (self.intrinsic_coords - torch.min(self.intrinsic_coords))/(torch.max(self.intrinsic_coords)-torch.min(self.intrinsic_coords))
         self.X_ground_truth = self.X.clone()
@@ -332,14 +337,22 @@ class Ellipsoid(ToyManifold):
 
 # %% ../../nbs/library/datasets.ipynb 28
 class Sphere(ToyManifold):
+<<<<<<< HEAD
     def __init__(self, num_points = 2000, r = 1, rotation_dimension:int = None, noise:float = 0, seed = None):
+=======
+    def __init__(self, num_points = 2000, r = 1, **kwargs):
+>>>>>>> 87c28a8 (updates to off manifold pullback)
         self.r = r
         theta = sym.Symbol("theta")
         phi = sym.Symbol("phi")
         F = sym.Matrix(
             [r*sym.cos(theta)*sym.sin(phi),r*sym.sin(theta)*sym.sin(phi),r*sym.cos(phi)]
         )
+<<<<<<< HEAD
         super().__init__(F, [0.0,2*np.pi], num_points = num_points, rotation_dimension = rotation_dimension, noise = noise, seed = seed)
+=======
+        super().__init__(F, [0.0,2*np.pi], num_points = num_points, **kwargs)
+>>>>>>> 87c28a8 (updates to off manifold pullback)
         self.compute_metrics()
     def pairwise_geodesic(self, 
                  a, # Coordinates in ambient space
@@ -385,11 +398,17 @@ class Sphere(ToyManifold):
 
 # %% ../../nbs/library/datasets.ipynb 33
 class Hemisphere(Sphere):
+<<<<<<< HEAD
     def __init__(self, num_points = 2000, r = 1, threshold=0, rotation_dimension:int = None, noise:float = 0, seed = None):
         super().__init__(num_points, r, rotation_dimension=rotation_dimension, noise=noise, seed = seed)
         hemisphere_mask = self.X[:,2] > threshold
         self.X = self.X[hemisphere_mask]
         self.X_ground_truth = self.X_ground_truth[hemisphere_mask]
+=======
+    def __init__(self, num_points = 2000, r = 1, threshold=0, **kwargs):
+        super().__init__(num_points, r,**kwargs)
+        self.X = self.X[self.X[:,2] > threshold]
+>>>>>>> 87c28a8 (updates to off manifold pullback)
 
 # %% ../../nbs/library/datasets.ipynb 37
 class SwissRoll(ToyManifold):

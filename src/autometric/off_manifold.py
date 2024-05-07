@@ -22,19 +22,20 @@ class OffManifolderLinear():
         self.density_k = density_k
         self.density_tol = density_tol
         self.density_exponential = density_exponential
+        self.device = X.device
         
-        self.preserve_matrix = torch.zeros(self.dim, self.folding_dim, dtype=torch.float)
+        self.preserve_matrix = torch.zeros(self.dim, self.folding_dim, dtype=torch.float, device = self.device)
         for i in range(self.dim):
             self.preserve_matrix[i,i] = 1.0
 
-        self.random_matrix = torch.randn(self.dim, self.folding_dim)
-        self.random_matrix[:self.dim, :self.dim] = torch.zeros(self.dim, self.dim)
+        self.random_matrix = torch.randn(self.dim, self.folding_dim, device = self.device)
+        self.random_matrix[:self.dim, :self.dim] = torch.zeros(self.dim, self.dim, device = self.device)
         # self.random_layer = torch.nn.Linear(self.dim, self.folding_dim)
 
     def _1density_loss(self, a):
         # 0 for points on manifold within tolerance. Designed for a single point.
         dists = torch.linalg.norm(self.X - a, axis=1)
-        print(dists.shape)
+        # print(dists.shape)
         smallest_k_dists, idxs = torch.topk(dists, self.density_k, largest=False) # return k smallest distances
         loss = torch.sum(
             torch.nn.functional.relu( smallest_k_dists - self.density_tol )
@@ -48,7 +49,7 @@ class OffManifolderLinear():
         random_dirs = points @ self.random_matrix
         # random_dirs = self.random_layer(points)
         weighting_factor = torch.exp(self.density_loss(points)*self.density_exponential) - 1 # starts at 1; gets higher immediately.
-        print(f"{preserved_subspace.shape} {random_dirs.shape} {weighting_factor.shape}")
+        # print(f"{preserved_subspace.shape} {random_dirs.shape} {weighting_factor.shape}")
         return preserved_subspace + random_dirs*weighting_factor[:,None]
 
     def pullback_metric(self, points):
