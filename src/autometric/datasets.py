@@ -602,7 +602,7 @@ from .branch_datasets import Branch
 def export_datasets(
     foldername:str,
     num_geodesics = 20,    
-    num_points_per_geodesic = 1000,
+    num_points_per_geodesic = 3000,
     seed = 480851,
 ):
     """
@@ -613,19 +613,35 @@ def export_datasets(
         os.makedirs(foldername)
         
     np.random.seed(seed)
-    dsets = {
-        'Nice Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = None, noise = 0, seed = seed), 
-        'Neutral Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 5, noise = 0.1, seed = seed), 
-        'Evil Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 15, noise = 0.3, seed = seed),
+    dsets = {}
+    for rot_dim in [None, 5, 15, 50]:
+        for noise in [0, 0.1, 0.3]:
+            for mfd in [SwissRoll]:
+                dsets[f'{mfd.__name__}_{rot_dim}_{noise}'] = mfd(num_points = num_points_per_geodesic, rotation_dimension = rot_dim, noise = noise, seed = seed)
+            for mfd in [Hemisphere]:
+                dsets[f'{mfd.__name__}_{rot_dim}_{noise}'] = mfd(num_points = 2 * num_points_per_geodesic, rotation_dimension = rot_dim, noise = noise, seed = seed)
+    for dim in [3, 5, 15]:
+        for path_length in [3, 4, 5]:
+            dsets[f'Branch_{dim}_{path_length}'] = Branch(dimension = dim, num_samples = num_points_per_geodesic, path_length = 3, max_branches = path_length, seed = seed)
+    # dsets = {
+    #     'Hemisphere_0_0' : Hemisphere(num_points = 3000, rotation_dimension = None, noise = 0, seed = seed), 
+    #     'Hemisphere_0_5' : Hemisphere(num_points = 3000, rotation_dimension = 5, noise = 0, seed = seed), 
+    #     'Hemisphere_0_15' : Hemisphere(num_points = 3000, rotation_dimension = 15, noise = 0, seed = seed), 
 
-        'Nice Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=None, noise = 0, seed = seed), # sklearn parameters
-        'Neutral Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=5, noise = 0.1, seed = seed), # sklearn parameters
-        'Evil Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=15, noise = 0.3, seed = seed), # sklearn parameters
+    #     'Neutral Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 5, noise = 0.1, seed = seed), 
+    #     'Evil Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 15, noise = 0.3, seed = seed),
+    #     'hi-dim Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 50, noise = 0.3, seed = seed),
+
+    #     'Nice Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=None, noise = 0, seed = seed), # sklearn parameters
+    #     'Neutral Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=5, noise = 0.1, seed = seed), # sklearn parameters
+    #     'Evil Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=15, noise = 0.3, seed = seed), # sklearn parameters
+    #     'hi-dim Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=50, noise = 0.3, seed = seed), # sklearn parameters
         
-        'Nice Branch' : Branch(dimension = 3, num_samples = 3000, path_length = 3, max_branches = 3, seed = seed),
-        'Neutral Branch' : Branch(dimension = 5, num_samples = 3000, path_length = 4, max_branches = 4, seed = seed),
-        'Evil Branch' : Branch(dimension = 15, num_samples = 3000, path_length = 5, max_branches = 5, seed = seed),
-    }
+    #     'Nice Branch' : Branch(dimension = 3, num_samples = 3000, path_length = 3, max_branches = 3, seed = seed),
+    #     'Neutral Branch' : Branch(dimension = 5, num_samples = 3000, path_length = 4, max_branches = 4, seed = seed),
+    #     'Evil Branch' : Branch(dimension = 15, num_samples = 3000, path_length = 5, max_branches = 5, seed = seed),
+    #     # 'hi-dim Branch' : Branch(dimension = 50, num_samples = 3000, path_length = 6, max_branches = 6, seed = seed),
+    # }
     for dname, dset in zip(dsets.keys(), dsets.values()):
         print(f"Creating {dname}")
         # make dname filename safe
