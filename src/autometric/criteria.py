@@ -7,7 +7,7 @@ __all__ = ['determinants_of_encoder_pullback', 'trace_of_encoder_pullback', 'ran
            'visualize_encoder_pullback_metrics_in_ambient_space', 'plot_indicatrices',
            'indicatrix_volume_variance_metric', 'median_heuristic', 'gaussian_kernel', 'frequency_of_volume_variance',
            'get_metric_stuffs', 'curvature_matching_metric', 'metric_mse_criterion', 'metric_evec_alignment',
-           'normal_vector_alignment']
+           'normal_vector_alignment', 'geodesic_length_criterion', 'distance_to_geodesic_criterion']
 
 # %% ../../nbs/library/criteria.ipynb 6
 from .metrics import PullbackMetric
@@ -615,3 +615,43 @@ def normal_vector_alignment(model, dataloader, manifold, pullback_type="encoder"
         real_normals.append(real_normal)
         computed_normals.append(computed_normal)
     return np.sum(dot_prods), real_normals, computed_normals
+
+# %% ../../nbs/library/criteria.ipynb 38
+import torch
+def geodesic_length_criterion(predicted_lengths, ground_truth_lengths):
+    # check if the inputs are a tensor; if not, convert them to tensors
+    if not isinstance(predicted_lengths, torch.Tensor):
+        predicted_lengths = torch.tensor(predicted_lengths)
+    if not isinstance(ground_truth_lengths, torch.Tensor):
+        ground_truth_lengths = torch.tensor(ground_truth_lengths)
+    
+    # check if the inputs are the same size
+    if predicted_lengths.shape != ground_truth_lengths.shape:
+        raise ValueError("Inputs must be the same size")
+    # check if the inputs are in the same order
+    if predicted_lengths.shape[0] != ground_truth_lengths.shape[0]:
+        raise ValueError("Inputs must be in the same order")        
+    
+    return torch.nn.functional.mse_loss(predicted_lengths, ground_truth_lengths)
+
+# %% ../../nbs/library/criteria.ipynb 40
+def _distance_to_geodesic_criterion(predicted_geodesic, true_geodesic):
+    # the inputs here are single samples from a geodesic; should be shape num_samples x num_dims
+    # for each input point, we want the closest distance to any point on the true geodesic using the euclidean distance, torch.cdist
+    D = torch.cdist(predicted_geodesic, true_geodesic)
+    min_dists_to_true_geodesic = D.min(dim=1)[0]
+    # we take the mean of the squared distances
+    return torch.mean(min_dists_to_true_geodesic**2)
+
+def distance_to_geodesic_criterion(
+    predicted_geodesic:torch.Tensor, # size num_geodesics x num_samples x num_dims
+    true_geodesic:torch.Tensor, # size num_geodesics num_samples x num_dims. But it's okay if the num_samples are different
+    ):
+    """
+    Mean of the squared distances from each predicted point to the closest point on the true geodesic
+    """
+    dists = []
+    for i in range(predicted_geodesic.shape[0]):
+        dists.append(_distance_to_geodesic_criterion(predicted_geodesic[i], true_geodesic[i]))
+    dists = torch.stack(dists)
+    return dists.mean()
