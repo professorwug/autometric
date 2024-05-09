@@ -5,7 +5,7 @@ __all__ = ['manifold_density', 'max_value', 'rejection_sample_from_surface', 'ge
            'rotate_data', 'ToyManifold', 'Torus', 'Saddle', 'Ellipsoid', 'Sphere', 'Hemisphere', 'SwissRoll',
            'PointcloudDataset', 'PointcloudWithDistancesDataset', 'dataloader_from_pointcloud_with_distances',
            'train_and_testloader_from_pointcloud_with_distances', 'plot_3d_vector_field', 'sphere_with_normals',
-           'export_datasets']
+           'export_datasets', 'GeodesicToyChest']
 
 # %% ../../nbs/library/datasets.ipynb 5
 import numpy as np
@@ -729,3 +729,83 @@ def export_datasets(
             geodesic_lengths = ls,
             
         )
+
+# %% ../../nbs/library/datasets.ipynb 69
+from .self_evaluating_datasets import SelfEvaluatingDataset, metric
+from fastcore.all import *
+import os.path
+import numpy as np
+from .criteria import geodesic_length_criterion, distance_to_geodesic_criterion
+from .utils import plot_3d_with_geodesics
+
+class GeodesicToyChest(SelfEvaluatingDataset):
+    def __init__(self,
+                 saved_directory:str, # loads the saved npz files from this directory
+                 manifolds = ['Nice Hemisphere', 'Nice Swiss Roll', 'Nice Torus', 'Nice Saddle', 'Nice Branch', 'Nice Ellipsoid'],
+                ):
+        store_attr()
+        datalist = []
+        names = manifolds
+
+        for name in names:
+            file_name = name.replace(" ", "_").lower() + '.npz'
+            x = np.load(os.path.join(saved_directory, file_name))
+            datalist.append(
+                {
+                    'X' : x['X'], 
+                    'X_ground_truth' : x['X_ground_truth'],
+                    'start_points' : x['start_points'], 
+                    'end_points' : x['end_points'],
+                    'geodesics' : x['geodesics'],
+                    'geodesic_lengths' : x['geodesic_lengths'],
+                }
+            )
+        super().__init__(datalist, names, ['geodesic points', 'geodesic lengths'])
+    def get_item(self, idx):
+        return torch.tensor(self.DS[idx].obj['X'], dtype=torch.float32), torch.tensor(self.DS[idx].obj['start_points'], dtype=torch.float32), torch.tensor(self.DS[idx].obj['end_points'], dtype=torch.float32)
+    def get_truth(self, result_name, idx):
+        if result_name == 'geodesic points':
+            return self.DS[idx].obj['geodesics']
+        elif result_name == 'geodesic lengths':
+            return self.DS[idx].obj['geodesic_lengths']
+
+    def plot_geodesics(self, name, geodesic_idx=None):
+        if name not in self.names:
+            print("Not among my manifolds, which are",self.names)
+        idx = self.names.index(name)
+        a = self.DS[idx]
+        X = a.obj['X']
+        if geodesic_idx is not None:
+            gs = a.results['geodesic points']['off-manifold-pullback'][geodesic_idx]
+            true_gs = a.results['geodesic points']['ground truth'][geodesic_idx]
+        else:
+            gs = a.results['geodesic points']['off-manifold-pullback']
+            true_gs = a.results['geodesic points']['ground truth']
+        plot_3d_with_geodesics(X, gs, true_gs)
+
+    def compute_metrics_for_manifold(self, name):
+        if name not in self.names:
+            print("Not among my manifolds, which are",self.names)
+        idx = self.names.index(name)
+        # use compute_metrics with custom labels, which are just for the dataset
+        single_manifold_table = self.compute_metrics(labels = self.DS[idx].results)
+        print(single_manifold_table)
+        return single_manifold_table
+            
+        
+    
+    @metric
+    def length_mse(self, a, b, result_name):
+        if result_name == "geodesic lengths":
+            return float(geodesic_length_criterion(a, b))
+        else:
+            return -1
+    @metric
+    def distance_to_geodesic(self, a, b, result_name):
+        if result_name == "geodesic points":
+            
+            return float(distance_to_geodesic_criterion(a, b))
+        else:
+            return -1
+        
+        

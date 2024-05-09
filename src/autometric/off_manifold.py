@@ -11,24 +11,28 @@ class OffManifolderLinear():
     """
     def __init__(self,
                  X, # n x d points sampled from manifold (in latent space)
+                 density_loss_function = None, # function that takes a batch of tensors as input, and outputs a scalar which is 0 on the manifold, and bigger further away.
                  folding_dim = 10,
                  density_k = 5,
                  density_tol = 0.1,
                  density_exponential = 4, 
+                 # modify to pass in density_loss
                 ):
         self.X = X
+        self.device = X.device
         self.dim = X.shape[1]
         self.folding_dim = folding_dim
         self.density_k = density_k
         self.density_tol = density_tol
         self.density_exponential = density_exponential
+        self.density_loss_function = density_loss_function
         
-        self.preserve_matrix = torch.zeros(self.dim, self.folding_dim, dtype=torch.float)
+        self.preserve_matrix = torch.zeros(self.dim, self.folding_dim, dtype=torch.float).to(self.device)
         for i in range(self.dim):
             self.preserve_matrix[i,i] = 1.0
 
-        self.random_matrix = torch.randn(self.dim, self.folding_dim)
-        self.random_matrix[:self.dim, :self.dim] = torch.zeros(self.dim, self.dim)
+        self.random_matrix = torch.randn(self.dim, self.folding_dim).to(self.device)
+        self.random_matrix[:self.dim, :self.dim] = torch.zeros(self.dim, self.dim).to(self.device)
         # self.random_layer = torch.nn.Linear(self.dim, self.folding_dim)
 
     def _1density_loss(self, a):
@@ -41,7 +45,10 @@ class OffManifolderLinear():
         )
         return loss
     def density_loss(self, points):
-        return torch.vmap(self._1density_loss)(points)
+        if self.density_loss_function is not None:
+            return self.density_loss_function(points)
+        else:
+            return torch.vmap(self._1density_loss)(points)
 
     def immersion(self, points):
         preserved_subspace = points @ self.preserve_matrix
@@ -64,7 +71,7 @@ class OffManifolderLinear():
         return torch.vmap(pullback_per_point)(points)
     
 
-# %% ../../nbs/library/off-manifold-pullback.ipynb 24
+# %% ../../nbs/library/off-manifold-pullback.ipynb 32
 # construct 2d grid
 import numpy as np
 def construct_ndgrid(*args):

@@ -590,10 +590,13 @@ def plot_3d(X,distribution=None, title="",lim=None,use_plotly=False, zlim = None
 
 # %% ../../nbs/library/util.ipynb 6
 # from plotly3d.plot import scatter
-def plot_3d_with_geodesics(X, geodesics, ground_truth_geodesics = None, s=5, filename = None):
+def plot_3d_with_geodesics(X, geodesics, ground_truth_geodesics = None, s=5, filename = None, title = ""):
     # if geodesics is not a list, wrap it in one
     if isinstance(geodesics, np.ndarray):
-        geodesics = [geodesics]
+        if len(geodesics.shape) == 2:
+            geodesics = [geodesics] # it's a single geodesic
+        elif len(geodesics.shape) == 3:
+            geodesics = [geodesics[i] for i in range(len(geodesics))] # it's a collection of geodesics. 
     combined_geodesics = np.concatenate(geodesics, axis=0)
     all_points = np.concatenate([X, combined_geodesics], axis=0)
     plot_colors = np.zeros(len(X) + len(combined_geodesics))
@@ -607,7 +610,7 @@ def plot_3d_with_geodesics(X, geodesics, ground_truth_geodesics = None, s=5, fil
         all_points = np.vstack([all_points, ground_truth_geo_points])
         plot_colors = np.concatenate([plot_colors, ground_truth_colors])
     # scatter(all_points, colors = plot_colors,s=s, filename = filename).show()
-    plot_3d(all_points, plot_colors, use_plotly=True)
+    plot_3d(all_points, plot_colors, use_plotly=True, title = title)
 
 # %% ../../nbs/library/util.ipynb 8
 from imageio import imread, mimwrite

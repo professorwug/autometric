@@ -3,299 +3,7 @@
   {
    "cell_type": "code",
    "execution_count": 1,
-   "id": "efd0c57e",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "import torch\n",
-    "def geodesic_length_criterion(predicted_lengths, ground_truth_lengths):\n",
-    "    # check if the inputs are a tensor; if not, convert them to tensors\n",
-    "    if not isinstance(predicted_lengths, torch.Tensor):\n",
-    "        predicted_lengths = torch.tensor(predicted_lengths)\n",
-    "    if not isinstance(ground_truth_lengths, torch.Tensor):\n",
-    "        ground_truth_lengths = torch.tensor(ground_truth_lengths)\n",
-    "    \n",
-    "    # check if the inputs are the same size\n",
-    "    if predicted_lengths.shape != ground_truth_lengths.shape:\n",
-    "        raise ValueError(\"Inputs must be the same size\")\n",
-    "    # check if the inputs are in the same order\n",
-    "    if predicted_lengths.shape[0] != ground_truth_lengths.shape[0]:\n",
-    "        raise ValueError(\"Inputs must be in the same order\")        \n",
-    "    \n",
-    "    return torch.functional.mse(predicted_lengths, ground_truth_lengths)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "id": "0c8950de",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|export\n",
-    "def _distance_to_geodesic_criterion(predicted_geodesic, true_geodesic):\n",
-    "    # the inputs here are single samples from a geodesic; should be shape num_samples x num_dims\n",
-    "    # for each input point, we want the closest distance to any point on the true geodesic using the euclidean distance, torch.cdist\n",
-    "    D = torch.cdist(predicted_geodesic, true_geodesic)\n",
-    "    return D.min(dim=1)[0]\n",
-    "\n",
-    "def distance_to_geodesic_criterion(\n",
-    "    predicted_geodesic:torch.Tensor, # size num_samples x num_dims\n",
-    "    true_geodesic:torch.Tensor, # size num_samples x num_dims. But it's okay if the num_samples are different\n",
-    "    ):\n",
-    "    \"\"\"\n",
-    "    Mean of the squared distances from each predicted point to the closest point on the true geodesic\n",
-    "    \"\"\"\n",
-    "    dists = []\n",
-    "    for i in range(predicted_geodesic.shape[0]):\n",
-    "        dists.append(_distance_to_geodesic_criterion(predicted_geodesic[i], true_geodesic[i]))\n",
-    "    dists = torch.stack(dists)\n",
-    "    \n",
-    "    # we particularly care about really far away points, so we'll square the distances\n",
-    "    dists = dists**2\n",
-    "    return dists.mean()\n",
-    "    "
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 3,
-   "id": "43a5d2ad",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "a, b = torch.rand(30), torch.rand(30)\n",
-    "geodesic_length_criterion(a, b)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 4,
-   "id": "5541cbba",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|export\n",
-    "import torch\n",
-    "def geodesic_length_criterion(predicted_lengths, ground_truth_lengths):\n",
-    "    # check if the inputs are a tensor; if not, convert them to tensors\n",
-    "    if not isinstance(predicted_lengths, torch.Tensor):\n",
-    "        predicted_lengths = torch.tensor(predicted_lengths)\n",
-    "    if not isinstance(ground_truth_lengths, torch.Tensor):\n",
-    "        ground_truth_lengths = torch.tensor(ground_truth_lengths)\n",
-    "    \n",
-    "    # check if the inputs are the same size\n",
-    "    if predicted_lengths.shape != ground_truth_lengths.shape:\n",
-    "        raise ValueError(\"Inputs must be the same size\")\n",
-    "    # check if the inputs are in the same order\n",
-    "    if predicted_lengths.shape[0] != ground_truth_lengths.shape[0]:\n",
-    "        raise ValueError(\"Inputs must be in the same order\")        \n",
-    "    \n",
-    "    return torch.functional.mse_loss(predicted_lengths, ground_truth_lengths)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 5,
-   "id": "e1bfed50",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "a, b = torch.rand(30), torch.rand(30)\n",
-    "geodesic_length_criterion(a, b)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 6,
-   "id": "9fcd8299",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|export\n",
-    "import torch\n",
-    "def geodesic_length_criterion(predicted_lengths, ground_truth_lengths):\n",
-    "    # check if the inputs are a tensor; if not, convert them to tensors\n",
-    "    if not isinstance(predicted_lengths, torch.Tensor):\n",
-    "        predicted_lengths = torch.tensor(predicted_lengths)\n",
-    "    if not isinstance(ground_truth_lengths, torch.Tensor):\n",
-    "        ground_truth_lengths = torch.tensor(ground_truth_lengths)\n",
-    "    \n",
-    "    # check if the inputs are the same size\n",
-    "    if predicted_lengths.shape != ground_truth_lengths.shape:\n",
-    "        raise ValueError(\"Inputs must be the same size\")\n",
-    "    # check if the inputs are in the same order\n",
-    "    if predicted_lengths.shape[0] != ground_truth_lengths.shape[0]:\n",
-    "        raise ValueError(\"Inputs must be in the same order\")        \n",
-    "    \n",
-    "    return torch.functional.mseloss(predicted_lengths, ground_truth_lengths)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 7,
-   "id": "cf7ebeeb",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "a, b = torch.rand(30), torch.rand(30)\n",
-    "geodesic_length_criterion(a, b)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 8,
-   "id": "3bfba3c4",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|export\n",
-    "import torch\n",
-    "def geodesic_length_criterion(predicted_lengths, ground_truth_lengths):\n",
-    "    # check if the inputs are a tensor; if not, convert them to tensors\n",
-    "    if not isinstance(predicted_lengths, torch.Tensor):\n",
-    "        predicted_lengths = torch.tensor(predicted_lengths)\n",
-    "    if not isinstance(ground_truth_lengths, torch.Tensor):\n",
-    "        ground_truth_lengths = torch.tensor(ground_truth_lengths)\n",
-    "    \n",
-    "    # check if the inputs are the same size\n",
-    "    if predicted_lengths.shape != ground_truth_lengths.shape:\n",
-    "        raise ValueError(\"Inputs must be the same size\")\n",
-    "    # check if the inputs are in the same order\n",
-    "    if predicted_lengths.shape[0] != ground_truth_lengths.shape[0]:\n",
-    "        raise ValueError(\"Inputs must be in the same order\")        \n",
-    "    \n",
-    "    return torch.nn.functional.mse_loss(predicted_lengths, ground_truth_lengths)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 9,
-   "id": "baf2ded0",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "a, b = torch.rand(30), torch.rand(30)\n",
-    "geodesic_length_criterion(a, b)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 10,
-   "id": "f3e7b371",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "a, b = torch.randn(20,4), torch.randn(20,4)\n",
-    "distance_to_geodesic_criterion(a, b)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 11,
-   "id": "71c05c9a",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#|export\n",
-    "def _distance_to_geodesic_criterion(predicted_geodesic, true_geodesic):\n",
-    "    # the inputs here are single samples from a geodesic; should be shape num_samples x num_dims\n",
-    "    # for each input point, we want the closest distance to any point on the true geodesic using the euclidean distance, torch.cdist\n",
-    "    D = torch.cdist(predicted_geodesic, true_geodesic)\n",
-    "    return D.min(dim=1)[0]\n",
-    "\n",
-    "def distance_to_geodesic_criterion(\n",
-    "    predicted_geodesic:torch.Tensor, # size num_geodesics x num_samples x num_dims\n",
-    "    true_geodesic:torch.Tensor, # size num_geodesics num_samples x num_dims. But it's okay if the num_samples are different\n",
-    "    ):\n",
-    "    \"\"\"\n",
-    "    Mean of the squared distances from each predicted point to the closest point on the true geodesic\n",
-    "    \"\"\"\n",
-    "    dists = []\n",
-    "    for i in range(predicted_geodesic.shape[0]):\n",
-    "        dists.append(_distance_to_geodesic_criterion(predicted_geodesic[i], true_geodesic[i]))\n",
-    "    dists = torch.stack(dists)\n",
-    "    \n",
-    "    # we particularly care about really far away points, so we'll square the distances\n",
-    "    dists = dists**2\n",
-    "    return dists.mean()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 12,
-   "id": "b4a322ba",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "a, b = torch.randn(10, 20,4), torch.randn(10, 20,4)\n",
-    "distance_to_geodesic_criterion(a, b)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 13,
-   "id": "945e9167",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "_distance_to_geodesic_criterion(a[0], b[0])"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 14,
-   "id": "edb8db38",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "a[0]"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 15,
-   "id": "e76b3a0b",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "torch.cdist(a[0], b[0])"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 16,
-   "id": "3d83aa0a",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "torch.cdist(a[0], b[0]).shape"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 17,
-   "id": "5176c15e",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "torch.cdist(a[0], b[0]).min(dim=1)[0]"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 18,
-   "id": "8828afa4",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "torch.cdist(a[0], b[0]).min(dim=1)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 19,
-   "id": "695ca795",
+   "id": "00a1327f",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -316,7 +24,13 @@
     "    Mean of the squared distances from each predicted point to the closest point on the true geodesic\n",
     "    \"\"\"\n",
     "    dists = []\n",
-    "    for i in range(predicted_geodesic.shape[0]):\n",
+    "    for i in range(len(predicted_geodesic)):\n",
+    "        a = predicted_geodesic[i]\n",
+    "        b = true_geodesic[i]\n",
+    "        if not isinstance(a, torch.Tensor):\n",
+    "            a = torch.tensor(a)\n",
+    "        if not isinstance(b, torch.Tensor):\n",
+    "            b = torch.tensor(b)\n",
     "        dists.append(_distance_to_geodesic_criterion(predicted_geodesic[i], true_geodesic[i]))\n",
     "    dists = torch.stack(dists)\n",
     "    return dists.mean()"
@@ -324,8 +38,45 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
-   "id": "90c74304",
+   "execution_count": 2,
+   "id": "ee427d83",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#|export\n",
+    "import torch\n",
+    "def _distance_to_geodesic_criterion(predicted_geodesic, true_geodesic):\n",
+    "    # the inputs here are single samples from a geodesic; should be shape num_samples x num_dims\n",
+    "    # for each input point, we want the closest distance to any point on the true geodesic using the euclidean distance, torch.cdist\n",
+    "    D = torch.cdist(predicted_geodesic, true_geodesic)\n",
+    "    min_dists_to_true_geodesic = D.min(dim=1)[0]\n",
+    "    # we take the mean of the squared distances\n",
+    "    return torch.mean(min_dists_to_true_geodesic**2)\n",
+    "\n",
+    "def distance_to_geodesic_criterion(\n",
+    "    predicted_geodesic:torch.Tensor, # size num_geodesics x num_samples x num_dims\n",
+    "    true_geodesic:torch.Tensor, # size num_geodesics num_samples x num_dims. But it's okay if the num_samples are different\n",
+    "    ):\n",
+    "    \"\"\"\n",
+    "    Mean of the squared distances from each predicted point to the closest point on the true geodesic\n",
+    "    \"\"\"\n",
+    "    dists = []\n",
+    "    for i in range(len(predicted_geodesic)):\n",
+    "        a = predicted_geodesic[i]\n",
+    "        b = true_geodesic[i]\n",
+    "        if not isinstance(a, torch.Tensor):\n",
+    "            a = torch.tensor(a)\n",
+    "        if not isinstance(b, torch.Tensor):\n",
+    "            b = torch.tensor(b)\n",
+    "        dists.append(_distance_to_geodesic_criterion(predicted_geodesic[i], true_geodesic[i]))\n",
+    "    dists = torch.stack(dists)\n",
+    "    return dists.mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "00dd0de9",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -335,28 +86,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 21,
-   "id": "17fab88e",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "_distance_to_geodesic_criterion(a[0], b[0])"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 22,
-   "id": "ac4a1ec8",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "_distance_to_geodesic_criterion(a[4], b[4]])"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 23,
-   "id": "2defd07b",
+   "execution_count": 4,
+   "id": "b292c36f",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -365,22 +96,202 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 24,
-   "id": "20a8daf2",
+   "execution_count": 5,
+   "id": "b79dacd8",
    "metadata": {},
    "outputs": [],
    "source": [
-    "torch.cdist(a[0], b[0]).min(dim=1)"
+    "%notebook save\n",
+    "!nbdev_export"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 25,
-   "id": "ca790815",
+   "execution_count": 6,
+   "id": "1007fa80",
    "metadata": {},
    "outputs": [],
    "source": [
-    "torch.cdist(a[0], b[0]).min(dim=1)[0]"
+    "#|export\n",
+    "import torch\n",
+    "def _distance_to_geodesic_criterion(predicted_geodesic, true_geodesic):\n",
+    "    # the inputs here are single samples from a geodesic; should be shape num_samples x num_dims\n",
+    "    # for each input point, we want the closest distance to any point on the true geodesic using the euclidean distance, torch.cdist\n",
+    "    D = torch.cdist(predicted_geodesic, true_geodesic)\n",
+    "    min_dists_to_true_geodesic = D.min(dim=1)[0]\n",
+    "    # we take the mean of the squared distances\n",
+    "    return torch.mean(min_dists_to_true_geodesic**2)\n",
+    "\n",
+    "def distance_to_geodesic_criterion(\n",
+    "    predicted_geodesic:torch.Tensor, # size num_geodesics x num_samples x num_dims\n",
+    "    true_geodesic:torch.Tensor, # size num_geodesics num_samples x num_dims. But it's okay if the num_samples are different\n",
+    "    ):\n",
+    "    \"\"\"\n",
+    "    Mean of the squared distances from each predicted point to the closest point on the true geodesic\n",
+    "    \"\"\"\n",
+    "    dists = []\n",
+    "    for i in range(len(predicted_geodesic)):\n",
+    "        a = predicted_geodesic[i]\n",
+    "        b = true_geodesic[i]\n",
+    "        if not isinstance(a, torch.Tensor):\n",
+    "            a = torch.tensor(a)\n",
+    "        if not isinstance(b, torch.Tensor):\n",
+    "            b = torch.tensor(b)\n",
+    "        dists.append(_distance_to_geodesic_criterion(a, b))\n",
+    "    dists = torch.stack(dists)\n",
+    "    return dists.mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "ff92932f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "a, b = torch.randn(10, 20,4), torch.randn(10, 20,4)\n",
+    "distance_to_geodesic_criterion(a, b)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "7c20cca0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_distance_to_geodesic_criterion(a[4], b[4])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "3e043281",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook save\n",
+    "!nbdev_export"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "b32923b3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#|export\n",
+    "import torch\n",
+    "def _distance_to_geodesic_criterion(predicted_geodesic, true_geodesic):\n",
+    "    # the inputs here are single samples from a geodesic; should be shape num_samples x num_dims\n",
+    "    # for each input point, we want the closest distance to any point on the true geodesic using the euclidean distance, torch.cdist\n",
+    "    D = torch.cdist(predicted_geodesic, true_geodesic)\n",
+    "    min_dists_to_true_geodesic = D.min(dim=1)[0]\n",
+    "    # we take the mean of the squared distances\n",
+    "    return torch.mean(min_dists_to_true_geodesic**2)\n",
+    "\n",
+    "def distance_to_geodesic_criterion(\n",
+    "    predicted_geodesic:torch.Tensor, # size num_geodesics x num_samples x num_dims\n",
+    "    true_geodesic:torch.Tensor, # size num_geodesics num_samples x num_dims. But it's okay if the num_samples are different\n",
+    "    ):\n",
+    "    \"\"\"\n",
+    "    Mean of the squared distances from each predicted point to the closest point on the true geodesic\n",
+    "    \"\"\"\n",
+    "    dists = []\n",
+    "    for i in range(len(predicted_geodesic)):\n",
+    "        a = predicted_geodesic[i]\n",
+    "        b = true_geodesic[i]\n",
+    "        if not isinstance(a, torch.Tensor):\n",
+    "            a = torch.tensor(a)\n",
+    "        if not isinstance(b, torch.Tensor):\n",
+    "            b = torch.tensor(b)\n",
+    "        a = a.float()\n",
+    "        b = b.float()\n",
+    "        dists.append(_distance_to_geodesic_criterion(a, b))\n",
+    "    dists = torch.stack(dists)\n",
+    "    return dists.mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "7f145dee",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "a, b = torch.randn(10, 20,4), torch.randn(10, 20,4)\n",
+    "distance_to_geodesic_criterion(a, b)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "75aa7e14",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_distance_to_geodesic_criterion(a[4], b[4])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "a0e83ebb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#|export\n",
+    "import torch\n",
+    "def _distance_to_geodesic_criterion(predicted_geodesic, true_geodesic):\n",
+    "    # the inputs here are single samples from a geodesic; should be shape num_samples x num_dims\n",
+    "    # for each input point, we want the closest distance to any point on the true geodesic using the euclidean distance, torch.cdist\n",
+    "    D = torch.cdist(predicted_geodesic, true_geodesic)\n",
+    "    min_dists_to_true_geodesic = D.min(dim=1)[0]\n",
+    "    # we take the mean of the squared distances\n",
+    "    return torch.mean(min_dists_to_true_geodesic**2)\n",
+    "\n",
+    "def distance_to_geodesic_criterion(\n",
+    "    predicted_geodesic:torch.Tensor, # size num_geodesics x num_samples x num_dims\n",
+    "    true_geodesic:torch.Tensor, # size num_geodesics num_samples x num_dims. But it's okay if the num_samples are different\n",
+    "    ):\n",
+    "    \"\"\"\n",
+    "    Mean of the squared distances from each predicted point to the closest point on the true geodesic\n",
+    "    \"\"\"\n",
+    "    dists = []\n",
+    "    for i in range(len(predicted_geodesic)):\n",
+    "        a = predicted_geodesic[i]\n",
+    "        b = true_geodesic[i]\n",
+    "        if not isinstance(a, torch.Tensor):\n",
+    "            a = torch.tensor(a)\n",
+    "        if not isinstance(b, torch.Tensor):\n",
+    "            b = torch.tensor(b)\n",
+    "        a = a.float()\n",
+    "        b = b.float()\n",
+    "        dists.append(_distance_to_geodesic_criterion(a, b))\n",
+    "    dists = torch.stack(dists)\n",
+    "    return dists.mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "5f620f81",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "a, b = torch.randn(10, 20,4), torch.randn(10, 20,4)\n",
+    "distance_to_geodesic_criterion(a, b)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "c11cde91",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "_distance_to_geodesic_criterion(a[4], b[4])"
    ]
   }
  ],

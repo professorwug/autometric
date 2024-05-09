@@ -635,6 +635,7 @@ def geodesic_length_criterion(predicted_lengths, ground_truth_lengths):
     return torch.nn.functional.mse_loss(predicted_lengths, ground_truth_lengths)
 
 # %% ../../nbs/library/criteria.ipynb 40
+import torch
 def _distance_to_geodesic_criterion(predicted_geodesic, true_geodesic):
     # the inputs here are single samples from a geodesic; should be shape num_samples x num_dims
     # for each input point, we want the closest distance to any point on the true geodesic using the euclidean distance, torch.cdist
@@ -651,7 +652,15 @@ def distance_to_geodesic_criterion(
     Mean of the squared distances from each predicted point to the closest point on the true geodesic
     """
     dists = []
-    for i in range(predicted_geodesic.shape[0]):
-        dists.append(_distance_to_geodesic_criterion(predicted_geodesic[i], true_geodesic[i]))
+    for i in range(len(predicted_geodesic)):
+        a = predicted_geodesic[i]
+        b = true_geodesic[i]
+        if not isinstance(a, torch.Tensor):
+            a = torch.tensor(a)
+        if not isinstance(b, torch.Tensor):
+            b = torch.tensor(b)
+        a = a.float()
+        b = b.float()
+        dists.append(_distance_to_geodesic_criterion(a, b))
     dists = torch.stack(dists)
     return dists.mean()
