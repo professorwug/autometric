@@ -432,7 +432,7 @@ class Sphere(ToyManifold):
 # %% ../../nbs/library/datasets.ipynb 44
 class Hemisphere(Sphere):
     def __init__(self, num_points = 2000, r = 1, threshold=0, rotation_dimension:int = None, noise:float = 0, seed = None):
-        super().__init__(num_points, r, rotation_dimension=rotation_dimension, noise=noise, seed = seed)
+        super().__init__(2*num_points, r, rotation_dimension=rotation_dimension, noise=noise, seed = seed)
         hemisphere_mask = self.X[:,2] > threshold
         self.X = self.X[hemisphere_mask]
         self.X_ground_truth = self.X_ground_truth[hemisphere_mask]
@@ -450,6 +450,10 @@ class SwissRoll(ToyManifold):
         )
         super().__init__(F, [0.0,1.0], num_points = num_points, rotation_dimension = rotation_dimension, noise = noise, seed = seed)
         self.compute_metrics()
+        
+    def intrinsic_distances(self):
+        return torch.cdist(self.intrinsic_coords, self.intrinsic_coords)
+        
     def pairwise_geodesic(self, 
                  a, # Coordinates in ambient space
                  b, 
@@ -482,7 +486,7 @@ class SwissRoll(ToyManifold):
         length = torch.linalg.norm(a - b)
         return g, length
 
-# %% ../../nbs/library/datasets.ipynb 59
+# %% ../../nbs/library/datasets.ipynb 61
 import torch
 
 class PointcloudDataset(torch.utils.data.Dataset):
@@ -511,13 +515,13 @@ class PointcloudWithDistancesDataset(torch.utils.data.Dataset):
         batch['d'] = self.distances[batch_idxs][:,batch_idxs]
         return batch
 
-# %% ../../nbs/library/datasets.ipynb 60
+# %% ../../nbs/library/datasets.ipynb 62
 def dataloader_from_pointcloud_with_distances(pointcloud, distances, batch_size = 64):
     dataset = PointcloudWithDistancesDataset(pointcloud, distances, batch_size)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=None, shuffle=True)
     return dataloader
 
-# %% ../../nbs/library/datasets.ipynb 61
+# %% ../../nbs/library/datasets.ipynb 63
 def train_and_testloader_from_pointcloud_with_distances(
     pointcloud, distances, batch_size = 64, train_test_split = 0.8
 ):
@@ -532,7 +536,7 @@ def train_and_testloader_from_pointcloud_with_distances(
     testloader = dataloader_from_pointcloud_with_distances(X_test, D_test, batch_size)
     return trainloader, testloader
 
-# %% ../../nbs/library/datasets.ipynb 63
+# %% ../../nbs/library/datasets.ipynb 65
 import numpy as np
 import plotly.graph_objects as go
 import chart_studio
@@ -631,7 +635,7 @@ def plot_3d_vector_field(X, *vector_fields, names=None, arrow_length=0.5, upload
         print("Your plot is now live at ",url)
 
 
-# %% ../../nbs/library/datasets.ipynb 64
+# %% ../../nbs/library/datasets.ipynb 66
 def sphere_with_normals(
     n_points
 ):
@@ -639,7 +643,7 @@ def sphere_with_normals(
     N = X
     return X, N
 
-# %% ../../nbs/library/datasets.ipynb 66
+# %% ../../nbs/library/datasets.ipynb 68
 import os
 from fastcore.script import *
 from .branch_datasets import Branch
@@ -730,7 +734,7 @@ def export_datasets(
             
         )
 
-# %% ../../nbs/library/datasets.ipynb 69
+# %% ../../nbs/library/datasets.ipynb 71
 from .self_evaluating_datasets import SelfEvaluatingDataset, metric
 from fastcore.all import *
 import os.path

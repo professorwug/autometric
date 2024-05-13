@@ -71,7 +71,7 @@ class OffManifolderLinear():
         return torch.vmap(pullback_per_point)(points)
     
 
-# %% ../../nbs/library/off-manifold-pullback.ipynb 32
+# %% ../../nbs/library/off-manifold-pullback.ipynb 33
 # construct 2d grid
 import numpy as np
 def construct_ndgrid(*args):

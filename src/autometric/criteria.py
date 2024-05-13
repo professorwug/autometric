@@ -13,6 +13,7 @@ __all__ = ['determinants_of_encoder_pullback', 'trace_of_encoder_pullback', 'ran
 from .metrics import PullbackMetric
 import numpy as np
 import torch
+from tqdm.auto import tqdm, trange
 def determinants_of_encoder_pullback(model, dataloader):
     # returns the determinants of the metric matrices for each point in the dataset
     Metric = PullbackMetric(model.input_dim, model.encode)
