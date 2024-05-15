@@ -2,36 +2,11 @@
 
 # %% auto 0
 __all__ = ['create_triangles_from_pointcloud', 'get_geodesics_from_triangle', 'plot_triangle_in_3d', 'euclidean_section_length',
-           'alexandrov_curvature_of_triangle', 'compute_triangle_curvatures']
+           'alexandrov_curvature_of_triangle', 'compute_triangle_curvatures',
+           'get_ground_truth_curvature_at_triangle_centroids']
 
-# %% ../../nbs/library/triangle-condition-curvature.ipynb 7
+# %% ../../nbs/library/triangle-condition-curvature.ipynb 9
 import numpy as np
-# def create_triangles_from_pointcloud(
-#     X:np.ndarray, 
-#     D:np.ndarray, # manifold distance matrix of X; shape (num_points, num_points).
-#     min_dist:float=0.1, # triangle edges must length greater than this
-#     num_triangles=100,
-#     ):
-#     """
-#     Create a set of triangles from a pointcloud. This is not a mesh; just a set of triangles with edge lengths around min_dist.
-#     Returns np.ndarray of shape (num_triangles, 3). Each row is a triangle; each entry is an index in X.
-#     """
-#     # subsample num_triangles points from X
-#     idxs = np.random.choice(X.shape[0], num_triangles, replace=False)
-#     # for each idx, construct one triangle by matching two points - both of which have distances greater than min_dist
-#     sub_D = D[idxs]
-#     triangles = []
-#     for i in range(num_triangles):
-#         # find two points with distances greater than min_dist
-#         idxs = np.where(sub_D[i,:] > min_dist)[0]
-#         if len(idxs) == 0:
-#             continue
-#         # find the two points with the smallest distance
-#         idxs = idxs[np.argsort(sub_D[i,idxs])]
-#         # add the two points to the triangle
-#         triangles.append([idxs[0], idxs[1], idxs[2]])
-#     return np.array(triangles)
-
 def create_triangles_from_pointcloud(
     X:np.ndarray, 
     D:np.ndarray, # manifold distance matrix of X; shape (num_points, num_points).
@@ -66,23 +41,23 @@ def create_triangles_from_pointcloud(
                     break
     return np.array(triangles)[:num_triangles]
 
-# %% ../../nbs/library/triangle-condition-curvature.ipynb 11
+# %% ../../nbs/library/triangle-condition-curvature.ipynb 12
 def get_geodesics_from_triangle(geodesic_fn, X, triangle_idxs, t = np.linspace(0,1,100)):
     start_idxs = [triangle_idxs[0], triangle_idxs[0], triangle_idxs[1]]
     end_idxs = [triangle_idxs[1], triangle_idxs[2], triangle_idxs[2]]
-    start_points = torch.tensor(X[start_idxs])
-    end_points = torch.tensor(X[end_idxs])
+    start_points = torch.as_tensor(X[start_idxs])
+    end_points = torch.as_tensor(X[end_idxs])
     points, lengths = geodesic_fn(start_points, end_points, t)
     return points, lengths
 
-# %% ../../nbs/library/triangle-condition-curvature.ipynb 12
+# %% ../../nbs/library/triangle-condition-curvature.ipynb 13
 from .utils import plot_3d_with_geodesics
 def plot_triangle_in_3d(X, triangle_idxs, geodesic_fn):
     gs, lengths = get_geodesics_from_triangle(geodesic_fn, X, triangle_idxs)
     plot_3d_with_geodesics(X, gs, title=f"Triangle {triangle_idxs}")
     
 
-# %% ../../nbs/library/triangle-condition-curvature.ipynb 15
+# %% ../../nbs/library/triangle-condition-curvature.ipynb 16
 def euclidean_section_length(
     a, # length from b' to c'
     b, # length from c' to a'
@@ -112,7 +87,7 @@ def alexandrov_curvature_of_triangle(X, triangle_idxs, geodesic_fn, return_extra
     else:
         return k
 
-# %% ../../nbs/library/triangle-condition-curvature.ipynb 24
+# %% ../../nbs/library/triangle-condition-curvature.ipynb 25
 def compute_triangle_curvatures(X:np.ndarray, # pointcloud
                                 D:np.ndarray, # distances on pointcloud; preferable manifold distances (PHATE). Used for creating triangles. Doesn't need to come from the geodesics.
                                 geodesic_fn, # function that takes start_points, end_points and ts and returns (a list of geodesics, length of each geodesic)
@@ -120,12 +95,28 @@ def compute_triangle_curvatures(X:np.ndarray, # pointcloud
                                 min_edge_length = 1,  # Must tune to each dataset. Defaults for torus.
                                 max_edge_length = 1.5,
                                 ):
-    """Compures the Alexandrov curvature of sampled triangles. Returns ks, middle_idxs; ks is a list of Alexandrov curvatures, and middle_idxs is a list of the indices of the middle point of each triangle."""
+    """Compures the Alexandrov curvature of sampled triangles. Returns ks, centroids; ks is a list of Alexandrov curvatures, and centroids is a list of the centroids of each triangle, which can be used to compare to ground truth curvatures."""
     triangles = create_triangles_from_pointcloud(X, D, min_edge_length, max_edge_length, num_triangles)
     ks = []
-    middle_idxs = []
+    centroids = []
     for t in tqdm(triangles):
         k, gs, c1_geodesic, d_geodesic = alexandrov_curvature_of_triangle(X, t, geodesic_fn, return_extras = True)
-        ks.append(k)
-        middle_idxs.append(d_geodesic[len(d_geodesic)//2])
-    return ks, middle_idxs
+        ks.append(float(k))
+        centroids.append(d_geodesic[len(d_geodesic)//2])
+    return np.array(ks), np.vstack(centroids)
+
+# %% ../../nbs/library/triangle-condition-curvature.ipynb 27
+from sklearn.metrics import pairwise_distances
+def get_ground_truth_curvature_at_triangle_centroids(
+    X, # pointcloud n x d
+    ks, # ground truth curvatures per point, shape n
+    centroids, # centroids, m x d
+):
+    """
+    Returns the ground truth curvature at the point closest to each centroid.
+    """
+    centroid_to_X_distances = pairwise_distances(centroids, X)
+    closest_idx_to_centroid = np.argmin(centroid_to_X_distances, axis=1)
+    curvatures_at_centroids = ks[closest_idx_to_centroid]
+    return curvatures_at_centroids.detach().numpy()
+    
