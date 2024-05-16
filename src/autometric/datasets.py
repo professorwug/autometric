@@ -277,11 +277,11 @@ class ToyManifold:
         """
         # test if start and end points are tensors
         if isinstance(start_points, np.ndarray):
-            start_points = torch.tensor(start_points)
+            start_points = torch.as_tensor(start_points)
         if isinstance(end_points, np.ndarray):
-            end_points = torch.tensor(end_points)
+            end_points = torch.as_tensor(end_points)
         if isinstance(ts, np.ndarray):
-            ts = torch.tensor(ts)
+            ts = torch.as_tensor(ts)
         
         # test if start and end points are among the previously sampled points
         # for each point, find the closest point in the sampled points. If it exceeds a threshold of 1e-3, then raise an error.
