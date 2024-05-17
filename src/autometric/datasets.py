@@ -651,11 +651,14 @@ from .branch_datasets import Branch
 @call_parse
 def export_datasets(
     foldername:str,
-    num_geodesics = 100,    
-    num_points_per_geodesic = 1000,
+    num_geodesics = 20,    
+    num_points_per_geodesic = 3000,
     seed = 480851,
-    get_geod=False,
+    get_geod=True,
 ):
+    num_geodesics = 20
+    num_points_per_geodesic = 3000
+    get_geod=False
     """
     Saves all of the datasets above into npz files.
     """
@@ -717,6 +720,7 @@ def export_datasets(
         end_points = X[endpoint_idxs[num_geodesics:]]
         ts = np.linspace(0, 1, num_points_per_geodesic)
         if get_geod:
+            print('getting geods')
             gs, ls = dset.geodesics(start_points, end_points, ts)
         
             # gs is a list; its contents may have different lengths, which will trip up np.savez
@@ -732,6 +736,7 @@ def export_datasets(
             # pad the ends of the list with copies of the last element to make them all the same length, using np.vstack
             gs = [np.vstack([g[:-1], np.repeat(g[-1][None,:], max_len - len(g) + 1, axis = 0)]) for g in gs]
         else:
+            print('no geod')
             gs, ls = None, None
         np.savez(
             os.path.join(foldername, f'{dname}.npz'), 
