@@ -651,9 +651,10 @@ from .branch_datasets import Branch
 @call_parse
 def export_datasets(
     foldername:str,
-    num_geodesics = 20,    
+    num_geodesics = 100,    
     num_points_per_geodesic = 1000,
     seed = 480851,
+    get_geod=False,
 ):
     """
     Saves all of the datasets above into npz files.
@@ -663,31 +664,39 @@ def export_datasets(
         os.makedirs(foldername)
         
     np.random.seed(seed)
-    dsets = {
-        'Nice Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = None, noise = 0, seed = seed), 
-        'Neutral Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 5, noise = 0.1, seed = seed), 
-        'Evil Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 15, noise = 0.3, seed = seed),
 
-        'Nice Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=None, noise = 0, seed = seed), # sklearn parameters
-        'Neutral Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=5, noise = 0.1, seed = seed), # sklearn parameters
-        'Evil Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=15, noise = 0.3, seed = seed), # sklearn parameters
+    dsets = {}
+    for rot_dim in [None, 5, 10, 15, 50]:
+        for noise in [0, 0.1, 0.3, 0.5, 0.7]:
+            for mfd in [Hemisphere,Torus,Saddle,Ellipsoid]:
+                dsets[f'{mfd.__name__}_{rot_dim}_{noise}'] = mfd(num_points = num_points_per_geodesic, rotation_dimension = rot_dim, noise = noise, seed = seed)
+
+
+    # dsets = {
+    #     'Nice Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = None, noise = 0, seed = seed), 
+    #     'Neutral Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 5, noise = 0.1, seed = seed), 
+    #     'Evil Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 15, noise = 0.3, seed = seed),
+
+    #     'Nice Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=None, noise = 0, seed = seed), # sklearn parameters
+    #     'Neutral Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=5, noise = 0.1, seed = seed), # sklearn parameters
+    #     'Evil Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=15, noise = 0.3, seed = seed), # sklearn parameters
         
-        'Nice Branch' : Branch(dimension = 3, num_samples = 3000, path_length = 3, max_branches = 3, seed = seed),
-        'Neutral Branch' : Branch(dimension = 5, num_samples = 3000, path_length = 4, max_branches = 4, seed = seed),
-        'Evil Branch' : Branch(dimension = 15, num_samples = 3000, path_length = 5, max_branches = 5, seed = seed),
+    #     'Nice Branch' : Branch(dimension = 3, num_samples = 3000, path_length = 3, max_branches = 3, seed = seed),
+    #     'Neutral Branch' : Branch(dimension = 5, num_samples = 3000, path_length = 4, max_branches = 4, seed = seed),
+    #     'Evil Branch' : Branch(dimension = 15, num_samples = 3000, path_length = 5, max_branches = 5, seed = seed),
         
-        'Nice Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=None, noise=0, seed = seed),
-        'Neutral Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=5, noise=0.1, seed = seed),
-        'Evil Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=15, noise=0.3, seed = seed),
+    #     'Nice Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=None, noise=0, seed = seed),
+    #     'Neutral Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=5, noise=0.1, seed = seed),
+    #     'Evil Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=15, noise=0.3, seed = seed),
         
-        'Nice Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=None, noise=0, seed = seed),
-        'Neutral Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=5, noise=0.1, seed = seed),
-        'Evil Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=15, noise=0.3, seed = seed),
+    #     'Nice Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=None, noise=0, seed = seed),
+    #     'Neutral Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=5, noise=0.1, seed = seed),
+    #     'Evil Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=15, noise=0.3, seed = seed),
         
-        'Nice Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=None, noise=0, seed = seed),
-        'Neutral Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=5, noise=0.1, seed = seed),
-        'Evil Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=15, noise=0.3, seed = seed),
-    }
+    #     'Nice Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=None, noise=0, seed = seed),
+    #     'Neutral Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=5, noise=0.1, seed = seed),
+    #     'Evil Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=15, noise=0.3, seed = seed),
+    # }
     for dname, dset in zip(dsets.keys(), dsets.values()):
         print(f"Creating {dname}")
         # make dname filename safe
@@ -707,22 +716,23 @@ def export_datasets(
         start_points = X[endpoint_idxs[:num_geodesics]]
         end_points = X[endpoint_idxs[num_geodesics:]]
         ts = np.linspace(0, 1, num_points_per_geodesic)
+        if get_geod:
+            gs, ls = dset.geodesics(start_points, end_points, ts)
         
-        gs, ls = dset.geodesics(start_points, end_points, ts)
-        
-        # gs is a list; its contents may have different lengths, which will trip up np.savez
-        # we pad the ends of the list with zeros to make them all the same length
-        
-        # convert to numpy arrays
-        if isinstance(gs[0], torch.Tensor):
-            gs = [g.detach().numpy() for g in gs]
-            ls = ls.numpy()
+            # gs is a list; its contents may have different lengths, which will trip up np.savez
+            # we pad the ends of the list with zeros to make them all the same length
             
+            # convert to numpy arrays
+            if isinstance(gs[0], torch.Tensor):
+                gs = [g.detach().numpy() for g in gs]
+                ls = ls.numpy()
+                
         
-        max_len = max([len(g) for g in gs])
-        # pad the ends of the list with copies of the last element to make them all the same length, using np.vstack
-        gs = [np.vstack([g[:-1], np.repeat(g[-1][None,:], max_len - len(g) + 1, axis = 0)]) for g in gs]
-
+            max_len = max([len(g) for g in gs])
+            # pad the ends of the list with copies of the last element to make them all the same length, using np.vstack
+            gs = [np.vstack([g[:-1], np.repeat(g[-1][None,:], max_len - len(g) + 1, axis = 0)]) for g in gs]
+        else:
+            gs, ls = None, None
         np.savez(
             os.path.join(foldername, f'{dname}.npz'), 
             X = X, 
