@@ -5,7 +5,7 @@ __all__ = ['manifold_density', 'max_value', 'rejection_sample_from_surface', 'ge
            'rotate_data', 'ToyManifold', 'Torus', 'Saddle', 'Ellipsoid', 'Sphere', 'Hemisphere', 'SwissRoll',
            'PointcloudDataset', 'PointcloudWithDistancesDataset', 'dataloader_from_pointcloud_with_distances',
            'train_and_testloader_from_pointcloud_with_distances', 'plot_3d_vector_field', 'sphere_with_normals',
-           'export_datasets', 'GeodesicToyChest']
+           'export_datasets', 'export_dataset', 'GeodesicToyChest']
 
 # %% ../../nbs/library/datasets.ipynb 5
 import numpy as np
@@ -243,7 +243,7 @@ class ToyManifold:
         b_idx = int(torch.argmin(torch.linalg.norm(self.X_ground_truth - b, dim=1), dim=0))
         
         # For better results, we sample a whole bunch of points and add them to X_ground_truth
-        X_extra_samples, _ = self.sample(50000)
+        X_extra_samples, _ = self.sample(500000)
         X_extra_samples = torch.tensor(X_extra_samples, dtype=torch.float64)
         X_combined = torch.cat([self.X_ground_truth, X_extra_samples], dim=0)
         
@@ -647,7 +647,7 @@ def sphere_with_normals(
 import os
 from fastcore.script import *
 from .branch_datasets import Branch
-
+import pathlib
 @call_parse
 def export_datasets(
     foldername:str,
@@ -658,14 +658,15 @@ def export_datasets(
 ):
     num_geodesics = 20
     num_points_per_geodesic = 3000
-    get_geod=False
+    get_geod=True
     """
     Saves all of the datasets above into npz files.
     """
     # check if the folder foldername exists. If not create it.
-    if not os.path.exists(foldername):
-        os.makedirs(foldername)
-        
+    # if not os.path.exists(foldername):
+    #     os.makedirs(foldername)
+    pathlib.Path(foldername).mkdir(parents=True, exist_ok=True)
+
     np.random.seed(seed)
 
     dsets = {}
@@ -749,7 +750,130 @@ def export_datasets(
             
         )
 
-# %% ../../nbs/library/datasets.ipynb 71
+# %% ../../nbs/library/datasets.ipynb 69
+def export_dataset(
+    foldername:str,
+    num_geodesics = 20,    
+    num_points_per_geodesic = 3000,
+    seed = 480851,
+    get_geod=True,
+    rot_dim=None,
+    noise=0,
+    mfd='Hemisphere',
+    load_file_name = None,
+):
+    num_geodesics = 20
+    num_points_per_geodesic = 3000
+    get_geod=True
+    """
+    Saves all of the datasets above into npz files.
+    """
+    # check if the folder foldername exists. If not create it.
+    # if not os.path.exists(foldername):
+    #     os.makedirs(foldername)
+        
+    pathlib.Path(foldername).mkdir(parents=True, exist_ok=True)
+
+
+    np.random.seed(seed)
+    if mfd == 'Hemisphere':
+        mfd = Hemisphere
+    elif mfd == 'Torus':
+        mfd = Torus
+    elif mfd == 'Saddle':
+        mfd = Saddle
+    elif mfd == 'Ellipsoid':
+        mfd = Ellipsoid
+    elif mfd == 'SwissRoll':
+        mfd = SwissRoll
+    else:
+        raise ValueError(f'manifold {mfd} not supported!')
+
+    dsets = {}
+    dsets[f'{mfd.__name__}_{rot_dim}_{noise}'] = mfd(num_points = num_points_per_geodesic, rotation_dimension = rot_dim, noise = noise, seed = seed)
+
+    # dsets = {
+    #     'Nice Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = None, noise = 0, seed = seed), 
+    #     'Neutral Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 5, noise = 0.1, seed = seed), 
+    #     'Evil Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = 15, noise = 0.3, seed = seed),
+
+    #     'Nice Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=None, noise = 0, seed = seed), # sklearn parameters
+    #     'Neutral Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=5, noise = 0.1, seed = seed), # sklearn parameters
+    #     'Evil Swiss Roll' : SwissRoll(num_points = 3000, r = 1, height = 21, delay = 1, num_spirals = 1.5, rotation_dimension=15, noise = 0.3, seed = seed), # sklearn parameters
+        
+    #     'Nice Branch' : Branch(dimension = 3, num_samples = 3000, path_length = 3, max_branches = 3, seed = seed),
+    #     'Neutral Branch' : Branch(dimension = 5, num_samples = 3000, path_length = 4, max_branches = 4, seed = seed),
+    #     'Evil Branch' : Branch(dimension = 15, num_samples = 3000, path_length = 5, max_branches = 5, seed = seed),
+        
+    #     'Nice Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=None, noise=0, seed = seed),
+    #     'Neutral Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=5, noise=0.1, seed = seed),
+    #     'Evil Torus' : Torus(num_points = 3000, R=2.0, r=1.0, rotation_dimension=15, noise=0.3, seed = seed),
+        
+    #     'Nice Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=None, noise=0, seed = seed),
+    #     'Neutral Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=5, noise=0.1, seed = seed),
+    #     'Evil Saddle' : Saddle(num_points = 3000, a=1, b = 1, rotation_dimension=15, noise=0.3, seed = seed),
+        
+    #     'Nice Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=None, noise=0, seed = seed),
+    #     'Neutral Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=5, noise=0.1, seed = seed),
+    #     'Evil Ellipsoid' : Ellipsoid(num_points = 3000, a=3, b=2, c=1, rotation_dimension=15, noise=0.3, seed = seed),
+    # }
+    for dname, dset in zip(dsets.keys(), dsets.values()):
+        print(f"Creating {dname}")
+        # make dname filename safe
+        dname = dname.replace(" ", "_")
+        dname = dname.lower()
+        # get geodesics
+        # first sample points from dset.X
+        if load_file_name is not None:
+            data = np.load(load_file_name)
+            dset.X = torch.tensor(data['data'], dtype=dset.X.dtype)
+            dset.X_ground_truth = torch.tensor(data['X_ground_truth'], dtype=dset.X.dtype)
+            start_points = torch.tensor(data['start_points'], dtype=dset.X.dtype)
+            end_points = torch.tensor(data['end_points'], dtype=dset.X.dtype)
+        X = dset.X
+        X_ground_truth = dset.X_ground_truth
+        
+        # if these are torch tensors, convert to numpy
+        if isinstance(X, torch.Tensor):
+            X = X.detach().numpy()
+            X_ground_truth = X_ground_truth.detach().numpy()
+            
+        if load_file_name is None:
+            endpoint_idxs = np.random.randint(0, dset.X.shape[0], size = num_geodesics*2)
+            start_points = X[endpoint_idxs[:num_geodesics]]
+            end_points = X[endpoint_idxs[num_geodesics:]]
+        ts = np.linspace(0, 1, num_points_per_geodesic)
+        if get_geod:
+            print('getting geods')
+            gs, ls = dset.geodesics(start_points, end_points, ts)
+        
+            # gs is a list; its contents may have different lengths, which will trip up np.savez
+            # we pad the ends of the list with zeros to make them all the same length
+            
+            # convert to numpy arrays
+            if isinstance(gs[0], torch.Tensor):
+                gs = [g.detach().numpy() for g in gs]
+                ls = ls.numpy()
+                
+        
+            max_len = max([len(g) for g in gs])
+            # pad the ends of the list with copies of the last element to make them all the same length, using np.vstack
+            gs = [np.vstack([g[:-1], np.repeat(g[-1][None,:], max_len - len(g) + 1, axis = 0)]) for g in gs]
+        else:
+            print('no geod')
+            gs, ls = None, None
+        np.savez(
+            os.path.join(foldername, f'{dname}.npz'), 
+            X = X, 
+            X_ground_truth = X_ground_truth,
+            start_points = start_points, 
+            end_points = end_points,
+            geodesics = gs,
+            geodesic_lengths = ls,
+            
+        )
+
+# %% ../../nbs/library/datasets.ipynb 72
 from .self_evaluating_datasets import SelfEvaluatingDataset, metric
 from fastcore.all import *
 import os.path
