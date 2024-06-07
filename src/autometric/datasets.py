@@ -671,10 +671,14 @@ def export_datasets(
 
     dsets = {}
     for rot_dim in [None, 5, 10, 15, 50]:
+        for noise in [0.1]:
+            for mfd in [Hemisphere,Torus,Saddle,Ellipsoid]:
+                dsets[f'{mfd.__name__}_{rot_dim}_{noise}'] = mfd(num_points = num_points_per_geodesic, rotation_dimension = rot_dim, noise = noise, seed = seed)
+    
+    for rot_dim in [15]:
         for noise in [0, 0.1, 0.3, 0.5, 0.7]:
             for mfd in [Hemisphere,Torus,Saddle,Ellipsoid]:
                 dsets[f'{mfd.__name__}_{rot_dim}_{noise}'] = mfd(num_points = num_points_per_geodesic, rotation_dimension = rot_dim, noise = noise, seed = seed)
-
 
     # dsets = {
     #     'Nice Hemisphere' : Hemisphere(num_points = 3000, rotation_dimension = None, noise = 0, seed = seed), 
